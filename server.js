@@ -62,7 +62,7 @@ async function callGemini(log, proxyTarget) {
         return res.data.candidates?.[0]?.content?.parts?.[0]?.text || 'Gemini无返回内容';
     } catch (e) {
          console.error('Gemini API 调用异常:', e); // 增加这行
-        return 'Gemini API 调用失败: ' + (e.response?.data?.error?.message || e.message);
+        return 'Gemini API 调用失败,请重试: ' + (e.response?.data?.error?.message || e.message);
     }
 }
 

@@ -75,7 +75,7 @@
         }
    .mc-bg-blur {
     position: fixed;
-    z-index: 0;
+    z-index: -1;
     top: 0; left: 0; right: 0; bottom: 0;
     width: 100vw;
     height: 100vh;
@@ -96,7 +96,7 @@
         <div class="container mx-auto px-4 py-3 flex items-center justify-between">
             <div class="flex items-center">
                 <div class="w-10 h-10 amethyst-bg flex items-center justify-center text-white mr-3 rounded-lg">
-                    <i class="fas fa-file-alt"></i>
+                    <i class="fas fa-file-alt text-green-600"></i>
                 </div>
                 <h1 class="text-xl font-bold text-gray-800">Minecraft-ios日志分析器</h1>
             </div>
@@ -129,10 +129,10 @@
     <section id="analysis" class="container mx-auto py-12 px-4">
         <div class="glassmorphism p-6 mb-8">
             <h3 class="text-2xl font-semibold mb-4 flex items-center">
-                <div class="w-10 h-10 amethyst-bg rounded-full flex items-center justify-center text-white mr-3">
+                <span class="w-10 h-10 amethyst-bg rounded-full flex items-center justify-center text-white mr-3">
                     <i class="fas fa-exclamation-triangle text-green-600"></i>
-                </div>
-                错误统计（没写
+                </span>
+                错误统计*没写
             </h3>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
                 <div>
@@ -179,10 +179,10 @@
     <section id="visualization" class="container mx-auto py-12 px-4">
         <div class="glassmorphism p-6">
             <h3 class="text-2xl font-semibold mb-4 flex items-center">
-                <div class="w-10 h-10 amethyst-bg rounded-full flex items-center justify-center text-white mr-3">
+                <span class="w-10 h-10 amethyst-bg rounded-full flex items-center justify-center text-white mr-3">
                     <i class="fas fa-chart-line text-green-600"></i>
-                </div>
-                玩家每日上传日志数量（没写
+                </span>
+                玩家每日上传日志数量*没写
             </h3>
             <div class="chart-container">
                 <canvas id="uploadChart"></canvas>
@@ -191,25 +191,25 @@
     </section>
 
     <!-- 页脚 -->
-    <footer class="bg-gray-800 text-white py-8 mt-12">
-        <div class="container mx-auto px-4">
-            <div class="flex flex-col md:flex-row justify-between items-center">
-                <div class="mb-4 md:mb-0">
-                    <div class="flex items-center">
-                        <div class="w-8 h-8 amethyst-bg flex items-center justify-center text-white mr-2 rounded">
-                            <i class="fas fa-file-alt text-green-600"></i>
-                        </div>
-                        <span class="font-bold">LanRhyme的日志分析器</span>
+    <footer class="bg-white text-gray-700 py-8 mt-12">
+    <div class="container mx-auto px-4">
+        <div class="flex flex-col md:flex-row justify-between items-center">
+            <div class="mb-4 md:mb-0">
+                <div class="flex items-center">
+                    <div class="w-8 h-8 amethyst-bg flex items-center justify-center text-white mr-2 rounded">
+                        <i class="fas fa-file-alt text-green-600"></i>
                     </div>
-                    <p class="text-sm text-gray-400 mt-2">by LanRhyme</p>
+                    <span class="font-bold">LanRhyme的日志分析器</span>
                 </div>
-                <div class="text-sm text-gray-400">
-                    <p>from <a href="https://lanrhyme.great-site.net" class="text-purple-400 hover:text-green-300">https://lanrhyme.great-site.net</a></p>
-                    <p>2025</p>
-                </div>
+                <p class="text-sm text-gray-500 mt-2">by LanRhyme</p>
+            </div>
+            <div class="text-sm text-gray-500">
+                <p>from <a href="https://lanrhyme.great-site.net" class="text-green-600 hover:text-green-800">https://lanrhyme.great-site.net</a></p>
+                <p>2025</p>
             </div>
         </div>
-    </footer>
+    </div>
+</footer>
 
     <script>
         // 图表初始化

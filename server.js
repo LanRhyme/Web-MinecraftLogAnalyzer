@@ -11,7 +11,7 @@ const upload = multer({ dest: 'uploads/' });
 app.use(cors());
 app.use(express.json());
 
-const GEMINI_PROXY_TARGET = process.env.GEMINI_PROXY_TARGET || 'https://dynamic-halva-76bb38.netlify.app/';
+const GEMINI_PROXY_TARGET = process.env.GEMINI_PROXY_TARGET || 'https://generativelanguage.googleapis.com/';
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY || 'AIzaSyD9RoIiKi1bAUO0nypRqyavUiFgxo4nJ3o';
 
 // 反向代理接口

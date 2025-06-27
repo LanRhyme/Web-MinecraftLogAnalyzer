@@ -11,12 +11,12 @@ const upload = multer({ dest: 'uploads/' });
 app.use(cors());
 app.use(express.json());
 
-const GEMINI_PROXY_TARGET = process.env.GEMINI_PROXY_TARGET || 'https://generativelanguage.googleapis.com/';
+const GEMINI_PROXY_TARGET = process.env.GEMINI_PROXY_TARGET || 'https://gemini-proxy.keyikai.me/';
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY || 'AIzaSyD9RoIiKi1bAUO0nypRqyavUiFgxo4nJ3o';
 
 // 反向代理接口
 app.post('/proxy/gemini', async (req, res) => {
-    const url = `${GEMINI_PROXY_TARGET}v1beta/models/gemini-pro:generateContent?key=${GEMINI_API_KEY}`;
+    const url = `${GEMINI_PROXY_TARGET}v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_API_KEY}`;
     try {
         const response = await axios.post(url, req.body, {
             headers: { 'Content-Type': 'application/json' }
@@ -53,7 +53,7 @@ function extractInfo(log) {
 // Gemini API 调用
 async function callGemini(log, proxyTarget) {
     const target = proxyTarget || GEMINI_PROXY_TARGET;
-    const url = `${target}v1beta/models/gemini-pro:generateContent?key=${GEMINI_API_KEY}`;
+    const url = `${target}v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_API_KEY}`;
     const prompt = `请分析以下Minecraft日志，给出主要错误原因和建议：\n${log}`;
     try {
         const res = await axios.post(url, {
@@ -61,6 +61,7 @@ async function callGemini(log, proxyTarget) {
         });
         return res.data.candidates?.[0]?.content?.parts?.[0]?.text || 'Gemini无返回内容';
     } catch (e) {
+         console.error('Gemini API 调用异常:', e); // 增加这行
         return 'Gemini API 调用失败: ' + (e.response?.data?.error?.message || e.message);
     }
 }

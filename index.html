@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LanRhyme的日志分析器</title>
+    <title>Minecraft日志分析器</title>
     <script src="https://cdn.tailwindcss.com/3.3.3"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
@@ -19,9 +19,6 @@
             border-radius: 12px;
             border: 1px solid rgba(255, 255, 255, 0.2);
             box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.1);
-        }
-        .amethyst-bg {
-            background-color: #528040;
         }
         .amethyst-dark {
             background-color: #357e3b;
@@ -76,9 +73,21 @@
             66% { transform: translate(-15%, 5%) scale(0.9); }
             100% { transform: translate(0, 0) scale(1); }
         }
+   .mc-bg-blur {
+    position: fixed;
+    z-index: 0;
+    top: 0; left: 0; right: 0; bottom: 0;
+    width: 100vw;
+    height: 100vh;
+    pointer-events: none;
+    background: url('img/mc1.jpg') center center no-repeat;
+    background-size: cover;
+    filter: blur(16px) brightness(0.7);
+}
     </style>
 </head>
 <body class="min-h-screen relative overflow-x-hidden">
+    <div class="mc-bg-blur"></div>
     <div class="blob top-0 left-0"></div>
     <div class="blob bottom-0 right-0"></div>
 
@@ -89,10 +98,10 @@
                 <div class="w-10 h-10 amethyst-bg flex items-center justify-center text-white mr-3 rounded-lg">
                     <i class="fas fa-file-alt"></i>
                 </div>
-                <h1 class="text-xl font-bold text-gray-800">LanRhyme的日志分析器</h1>
+                <h1 class="text-xl font-bold text-gray-800">Minecraft-ios日志分析器</h1>
             </div>
-            <a href="https://lanrhyme.great-site.net" class="amethyst-bg text-white px-4 py-2 rounded-lg font-medium hover:bg-green-700 transition-colors flex items-center">
-                <i class="fas fa-arrow-left mr-2"></i>返回LanRhyme的个人网站
+            <a href="https://lanrhyme.great-site.net" class="amethyst-dark text-white px-6 py-3 rounded-lg font-medium hover:bg-green-800 transition-colors">
+                <i class="fas fa-arrow-left mr-2 text-green-600"></i>返回LanRhyme的个人网站
             </a>
             </a>
         </div>
@@ -101,16 +110,16 @@
     <!-- 头部横幅 -->
     <header class="amethyst-bg text-white py-16 relative overflow-hidden">
         <div class="container mx-auto px-4 text-center relative z-10">
-            <h1 class="text-4xl md:text-5xl font-bold mb-4">LanRhyme的日志分析器</h1>
+            <h1 class="text-4xl md:text-5xl font-bold mb-4">Minecraft日志分析器</h1>
             <p class="text-xl md:text-2xl mb-8">Amethyst(Pojav)-IOS专用，其他启动器可能也可以？</p>
             <div class="max-w-3xl mx-auto glassmorphism p-6">
                 <div class="flex flex-col md:flex-row gap-4">
                     <input id="logFile" type="file" class="flex-grow p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500" accept=".log,.txt">
                     <button id="uploadBtn" class="amethyst-dark text-white px-6 py-3 rounded-lg font-medium hover:bg-green-800 transition-colors">
-                        <i class="fas fa-upload mr-2"></i>上传日志文件
+                        <i class="fas fa-upload mr-2 text-green-600"></i>上传日志文件
                     </button>
                 </div>
-                <p class="text-sm text-gray-600 mt-2">支持.log和.txt格式的Minecraft日志文件</p>
+                <p class="text-sm text-gray-600 mt-2">支持.log和.txt格式的Minecraft日志文件，请确保文件大小小于8M，若依旧无法解决请把此界面截图和日志文件发送给他人</p>
             </div>
             <div id="analysisResult" class="mt-6"></div>
         </div>
@@ -121,9 +130,9 @@
         <div class="glassmorphism p-6 mb-8">
             <h3 class="text-2xl font-semibold mb-4 flex items-center">
                 <div class="w-10 h-10 amethyst-bg rounded-full flex items-center justify-center text-white mr-3">
-                    <i class="fas fa-exclamation-triangle"></i>
+                    <i class="fas fa-exclamation-triangle text-green-600"></i>
                 </div>
-                错误统计
+                错误统计（没写
             </h3>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
                 <div>
@@ -171,9 +180,9 @@
         <div class="glassmorphism p-6">
             <h3 class="text-2xl font-semibold mb-4 flex items-center">
                 <div class="w-10 h-10 amethyst-bg rounded-full flex items-center justify-center text-white mr-3">
-                    <i class="fas fa-chart-line"></i>
+                    <i class="fas fa-chart-line text-green-600"></i>
                 </div>
-                玩家每日上传日志数量
+                玩家每日上传日志数量（没写
             </h3>
             <div class="chart-container">
                 <canvas id="uploadChart"></canvas>
@@ -188,7 +197,7 @@
                 <div class="mb-4 md:mb-0">
                     <div class="flex items-center">
                         <div class="w-8 h-8 amethyst-bg flex items-center justify-center text-white mr-2 rounded">
-                            <i class="fas fa-file-alt"></i>
+                            <i class="fas fa-file-alt text-green-600"></i>
                         </div>
                         <span class="font-bold">LanRhyme的日志分析器</span>
                     </div>
@@ -298,8 +307,8 @@
 
             // 立即显示Gemini分析卡片（占位）
             resultDiv.innerHTML += `<div id="geminiCard" class="result-card">
-                <div class="result-title">Gemini分析结果</div>
-                <div class="text-gray-400">分析中，请稍候...</div>
+                <div class="result-title">AI分析结果(gemini-2.5-flash)</div>
+                <div class="text-gray-700">分析中，请稍候...</div>
             </div>`;
 
             // 2. 异步请求Gemini分析
@@ -310,10 +319,10 @@
 })
             .then(res2 => res2.json())
             .then(data2 => {
-                document.querySelector('#geminiCard .text-gray-400').innerText = data2.gemini;
+                document.querySelector('#geminiCard .text-gray-700').innerText = data2.gemini;
             })
             .catch(e => {
-                document.querySelector('#geminiCard .text-gray-400').innerText = '分析失败：' + e.message;
+                document.querySelector('#geminiCard .text-gray-700').innerText = '分析失败：' + e.message;
             });
         } catch (e) {
             resultDiv.innerHTML = `<div class="text-red-600">分析失败：${e.message}</div>`;

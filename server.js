@@ -11,8 +11,8 @@ const upload = multer({ dest: 'uploads/' });
 app.use(cors());
 app.use(express.json());
 
-const GEMINI_PROXY_TARGET = process.env.GEMINI_PROXY_TARGET || 'https://generativelanguage.googleapis.com/';
-const GEMINI_API_KEY = process.env.GEMINI_API_KEY || '你的有效APIKEY';
+const GEMINI_PROXY_TARGET = process.env.GEMINI_PROXY_TARGET || 'https://dynamic-halva-76bb38.netlify.app/';
+const GEMINI_API_KEY = process.env.GEMINI_API_KEY || 'AIzaSyD9RoIiKi1bAUO0nypRqyavUiFgxo4nJ3o';
 
 // 反向代理接口
 app.post('/proxy/gemini', async (req, res) => {
@@ -33,11 +33,11 @@ function extractInfo(log) {
 
     // Launcher Version
     const launcherMatch = log.match(/\[Pre-Init\] Version:\s*([^\r\n]+)/);
-    if (launcherMatch) info.launcher = launcherMatch[1].trim();
+    if (launcherMatch) info.launcher_version = launcherMatch[1].trim();
 
     // Java Version
     const javaMatch = log.match(/\[JavaLauncher\] JAVA_HOME has been set to\s*([^\r\n]+)/);
-    if (javaMatch) info.java = javaMatch[1].trim();
+    if (javaMatch) info.java_version  = javaMatch[1].trim();
 
     // 渲染器
     const rendererMatch = log.match(/\[JavaLauncher\] RENDERER is set to\s*([^\r\n]+)/);
@@ -45,7 +45,7 @@ function extractInfo(log) {
 
     // 游戏版本（兼容中英文括号）
      const mcMatch = log.match(/Launching\s+Minecraft\s+([^\s\r\n]+)/);
-    if (mcMatch) info.minecraft = mcMatch[1].trim();
+    if (mcMatch) info.minecraft_version = mcMatch[1].trim();
 
     return info;
 }

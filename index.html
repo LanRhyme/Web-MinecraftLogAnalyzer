@@ -304,10 +304,10 @@
 
             // 2. 异步请求Gemini分析
             fetch('/api/gemini', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ log: data1.log })
-            })
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ log: data1.log, proxy: 'https://dynamic-halva-76bb38.netlify.app/' })
+})
             .then(res2 => res2.json())
             .then(data2 => {
                 document.querySelector('#geminiCard .text-gray-400').innerText = data2.gemini;

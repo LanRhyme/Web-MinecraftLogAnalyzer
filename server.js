@@ -51,8 +51,9 @@ function extractInfo(log) {
 }
 
 // Gemini API 调用
-async function callGemini(log) {
-    const url = `${GEMINI_PROXY_TARGET}v1beta/models/gemini-pro:generateContent?key=${GEMINI_API_KEY}`;
+async function callGemini(log, proxyTarget) {
+    const target = proxyTarget || GEMINI_PROXY_TARGET;
+    const url = `${target}v1beta/models/gemini-pro:generateContent?key=${GEMINI_API_KEY}`;
     const prompt = `请分析以下Minecraft日志，给出主要错误原因和建议：\n${log}`;
     try {
         const res = await axios.post(url, {
@@ -75,10 +76,9 @@ app.post('/api/extract', upload.single('file'), async (req, res) => {
 
 // 只做Gemini分析
 app.post('/api/gemini', async (req, res) => {
-    console.log('收到 /api/gemini 请求', req.headers['content-type'], req.body);
-    const { log } = req.body;
+    const { log, proxy } = req.body;
     if (!log) return res.status(400).json({ error: '缺少日志内容' });
-    const gemini = await callGemini(log);
+    const gemini = await callGemini(log, proxy);
     res.json({ gemini });
 });
 

@@ -315,7 +315,7 @@
             fetch('/api/gemini', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ log: data1.log, proxy: 'https://generativelanguage.googleapis.com/' })
+    body: JSON.stringify({ log: data1.log, proxy: 'https://gemini-proxy.keyikai.me/' })
 })
             .then(res2 => res2.json())
             .then(data2 => {

@@ -14,11 +14,12 @@
             color: #1f2937;
         }
         .glassmorphism {
-            background: rgba(255, 255, 255, 0.7);
-            backdrop-filter: blur(10px);
-            border-radius: 12px;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.1);
+            background: rgba(255, 255, 255, 0.8); /* 提升透明度让模糊更明显 */
+            backdrop-filter: blur(30px); /* 增强模糊强度 */
+            border-radius: 20px; /* 圆角调整 */
+            border: 1px solid rgba(255, 255, 255, 0.3); /* 边框优化 */
+            box-shadow: 0 12px 40px 0 rgba(31, 38, 135, 0.15); /* 阴影加强 */
+            transition: all 0.3s ease; /* 添加过渡效果 */
         }
         .amethyst-dark {
             background-color: #357e3b;
@@ -68,10 +69,10 @@
             z-index: 1 !important;
         }
         /* 错误统计卡片和上传可视化卡片应用动画 */
-        .anim-card {
+       .anim-card {
             opacity: 0;
-            transform: translateY(20px);
-            transition: all 0.6s ease-out;
+            transform: translateY(30px);
+            transition: all 0.8s cubic-bezier(0.2, 0.8, 0.2, 1); /* 调整缓动函数 */
         }
         .anim-card.active {
             opacity: 1;
@@ -130,7 +131,7 @@
                 </div>
                 <p class="text-sm text-gray-600 mt-2">支持.log和.txt格式的Minecraft日志文件，请确保文件大小小于8M，若依旧无法解决请把此界面截图和日志文件发送给他人</p>
             </div>
-            <div id="analysisResult" class="mt-6"></div>
+            <div id="analysisResult" class="mt-6 anim-card"></div>
         </div>
     </header>
 
@@ -214,7 +215,7 @@
                 </div>
                 <div class="text-sm text-gray-500">
                     <p>from <a href="https://lanrhyme.great-site.net" class="text-green-600 hover:text-green-800">https://lanrhyme.great-site.net</a></p>
-                    <p>2025</p>
+                    <p>©2025</p>
                 </div>
             </div>
         </div>
@@ -330,7 +331,7 @@
                     return;
                 }
                 // 显示基础信息卡片
-                let infoHtml = `<div class="result-card anim-card">
+                let infoHtml = `<div class="result-card glassmorphism anim-card">
                     <div class="result-title"><b>基础信息提取</b></div>
                     <ul class="list-disc list-inside">`;
                 for (const k in data1.info) {
@@ -339,8 +340,12 @@
                 infoHtml += '</ul></div>';
                 resultDiv.innerHTML = infoHtml;
 
+                setTimeout(() => {
+                    document.querySelector('.anim-card').classList.add('active');
+                }, 100);
+
                 // 立即显示Gemini分析卡片
-                resultDiv.innerHTML += `<div id="geminiCard" class="result-card">
+                resultDiv.innerHTML += `<div id="geminiCard" class="result-card glassmorphism anim-card">
                     <div class="result-title"><b>AI分析结果(gemini-2.5-flash)</b></div>
                     <div class="text-gray-700">分析中，请稍候...</div>
                 </div>`;

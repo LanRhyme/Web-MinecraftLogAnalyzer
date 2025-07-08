@@ -13,6 +13,7 @@
     "@vercel/speed-insights": "^1.2.0",
     "axios": "^1.10.0",
     "cors": "^2.8.5",
+    "dotenv": "^17.1.0",
     "express": "^5.1.0",
     "multer": "^2.0.1"
   }

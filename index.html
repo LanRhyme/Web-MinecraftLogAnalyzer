@@ -14,12 +14,12 @@
             color: #1f2937;
         }
         .glassmorphism {
-            background: rgba(255, 255, 255, 0.8); /* 提升透明度让模糊更明显 */
-            backdrop-filter: blur(30px); /* 增强模糊强度 */
-            border-radius: 20px; /* 圆角调整 */
-            border: 1px solid rgba(255, 255, 255, 0.3); /* 边框优化 */
-            box-shadow: 0 12px 40px 0 rgba(31, 38, 135, 0.15); /* 阴影加强 */
-            transition: all 0.3s ease; /* 添加过渡效果 */
+            background: rgba(255, 255, 255, 0.65);
+            backdrop-filter: blur(12px);
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.1);
+            transition: all 0.3s ease;
         }
         .amethyst-dark {
             background-color: #357e3b;
@@ -53,26 +53,22 @@
             z-index: -1;
             animation: blob-movement 15s infinite linear;
         }
-        /* 修复后的分析结果卡片样式 */
         #analysisResult .result-card {
-            background: white !important;
             padding: 1.5rem !important;
-            border-radius: 10px !important;
-            box-shadow: 0 2px 8px 0 rgba(31,38,135,0.05) !important;
+            border-radius: 15px !important;
             margin-bottom: 1.5rem !important;
-            color: #4b5563 !important;
-            font-size: 1rem !important;
-            opacity: 1 !important;
-            transform: none !important;
-            transition: none !important;
+            color: #374151 !important;
             position: relative !important;
             z-index: 1 !important;
+            background: rgba(255, 255, 255, 0.65) !important;
+            backdrop-filter: blur(12px);
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
         }
-        /* 错误统计卡片和上传可视化卡片应用动画 */
-       .anim-card {
+        .anim-card {
             opacity: 0;
             transform: translateY(30px);
-            transition: all 0.8s cubic-bezier(0.2, 0.8, 0.2, 1); /* 调整缓动函数 */
+            transition: all 0.8s cubic-bezier(0.2, 0.8, 0.2, 1);
         }
         .anim-card.active {
             opacity: 1;
@@ -95,6 +91,31 @@
             66% { transform: translate(-15%, 5%) scale(0.9); }
             100% { transform: translate(0, 0) scale(1); }
         }
+        #custom-menu {
+            display: none;
+            position: fixed;
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            padding: 0.5rem 0;
+            z-index: 9999;
+            min-width: 180px;
+            overflow: hidden;
+            transition: all 0.2s ease-out;
+            transform-origin: top left;
+            opacity: 0;
+            transform: scale(0.95);
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            user-select: none;
+        }
+        #custom-menu.visible { opacity: 1; transform: scale(1); }
+        #custom-menu.hiding { opacity: 0; transform: scale(0.95); }
+        .menu-item { display: flex; align-items: center; padding: 0.75rem 1.25rem; cursor: pointer; transition: all 0.2s ease; color: #374151; }
+        .menu-item:hover { background-color: #f3f4f6; border-radius: 15px; }
+        .menu-item i { width: 1.5rem; margin-right: 0.75rem; color: #6b7280; }
+        .menu-divider { border-top: 1px solid #e5e7eb; margin: 0.25rem 0; }
+        .menu-header { padding: 0.5rem 1.25rem; font-size: 0.875rem; color: #9ca3af; text-transform: uppercase; font-weight: 500; }
     </style>
 </head>
 <body class="min-h-screen relative overflow-x-hidden">
@@ -102,8 +123,7 @@
     <div class="blob top-0 left-0"></div>
     <div class="blob bottom-0 right-0"></div>
 
-    <!-- 导航条 -->
-    <nav class="glassmorphism sticky top-0 z-50 shadow-md">
+    <nav class="glassmorphism sticky top-0 z-50">
         <div class="container mx-auto px-4 py-3 flex items-center justify-between">
             <div class="flex items-center">
                 <div class="w-10 h-10 amethyst-bg flex items-center justify-center text-white mr-3 rounded-lg">
@@ -117,7 +137,6 @@
         </div>
     </nav>
 
-    <!-- 头部横幅 -->
     <header class="amethyst-bg text-white py-16 relative overflow-hidden">
         <div class="container mx-auto px-4 text-center relative z-10">
             <h1 class="text-4xl md:text-5xl font-bold mb-4">Minecraft日志分析器</h1>
@@ -131,11 +150,10 @@
                 </div>
                 <p class="text-sm text-gray-600 mt-2">支持.log和.txt格式的Minecraft日志文件，请确保文件大小小于8M，若依旧无法解决请把此界面截图和日志文件发送给他人</p>
             </div>
-            <div id="analysisResult" class="mt-6 anim-card"></div>
+            <div id="analysisResult" class="mt-6"></div>
         </div>
     </header>
 
-    <!-- 错误统计部分 - 使用anim-card类应用动画 -->
     <section id="analysis" class="container mx-auto py-12 px-4">
         <div class="glassmorphism p-6 mb-8 anim-card">
             <h3 class="text-2xl font-semibold mb-4 flex items-center">
@@ -157,27 +175,9 @@
                     <div class="mb-6">
                         <h4 class="font-medium text-gray-700 mb-3">常见错误</h4>
                         <div class="space-y-3">
-                            <div class="bg-red-50 p-3 rounded-lg">
-                                <div class="flex justify-between items-center">
-                                    <span class="font-medium text-red-700">sodium!!!</span>
-                                    <span class="text-sm bg-red-100 text-red-800 px-2 py-1 rounded">32次</span>
-                                </div>
-                                <p class="text-sm text-gray-600 mt-1">别jb用优化模组了</p>
-                            </div>
-                            <div class="bg-yellow-50 p-3 rounded-lg">
-                                <div class="flex justify-between items-center">
-                                    <span class="font-medium text-yellow-700">网络问题</span>
-                                    <span class="text-sm bg-yellow-100 text-yellow-800 px-2 py-1 rounded">18次</span>
-                                </div>
-                                <p class="text-sm text-gray-600 mt-1">梯子是个好东西</p>
-                            </div>
-                            <div class="bg-blue-50 p-3 rounded-lg">
-                                <div class="flex justify-between items-center">
-                                    <span class="font-medium text-blue-700">渲染器崩溃</span>
-                                    <span class="text-sm bg-blue-100 text-blue-800 px-2 py-1 rounded">12次</span>
-                                </div>
-                                <p class="text-sm text-gray-600 mt-1">自动！自动！自动！</p>
-                            </div>
+                            <div class="bg-red-50 p-3 rounded-lg"><div class="flex justify-between items-center"><span class="font-medium text-red-700">sodium!!!</span><span class="text-sm bg-red-100 text-red-800 px-2 py-1 rounded">32次</span></div><p class="text-sm text-gray-600 mt-1">别jb用优化模组了</p></div>
+                            <div class="bg-yellow-50 p-3 rounded-lg"><div class="flex justify-between items-center"><span class="font-medium text-yellow-700">网络问题</span><span class="text-sm bg-yellow-100 text-yellow-800 px-2 py-1 rounded">18次</span></div><p class="text-sm text-gray-600 mt-1">梯子是个好东西</p></div>
+                            <div class="bg-blue-50 p-3 rounded-lg"><div class="flex justify-between items-center"><span class="font-medium text-blue-700">渲染器崩溃</span><span class="text-sm bg-blue-100 text-blue-800 px-2 py-1 rounded">12次</span></div><p class="text-sm text-gray-600 mt-1">自动！自动！自动！</p></div>
                         </div>
                     </div>
                 </div>
@@ -185,7 +185,6 @@
         </div>
     </section>
 
-    <!-- 玩家日志上传可视化 - 使用anim-card类应用动画 -->
     <section id="visualization" class="container mx-auto py-12 px-4">
         <div class="glassmorphism p-6 anim-card">
             <h3 class="text-2xl font-semibold mb-4 flex items-center">
@@ -200,117 +199,103 @@
         </div>
     </section>
 
-    <!-- 页脚 -->
     <footer class="bg-white text-gray-700 py-8 mt-12">
         <div class="container mx-auto px-4">
             <div class="flex flex-col md:flex-row justify-between items-center">
-                <div class="mb-4 md:mb-0">
-                    <div class="flex items-center">
-                        <div class="w-8 h-8 amethyst-bg flex items-center justify-center text-white mr-2 rounded">
-                            <i class="fas fa-file-alt text-green-600"></i>
-                        </div>
-                        <span class="font-bold">LanRhyme的日志分析器</span>
-                    </div>
-                    <p class="text-sm text-gray-500 mt-2">by LanRhyme</p>
-                </div>
-                <div class="text-sm text-gray-500">
-                    <p>from <a href="https://lanrhyme.great-site.net" class="text-green-600 hover:text-green-800">https://lanrhyme.great-site.net</a></p>
-                    <p>©2025</p>
-                </div>
+                <div class="mb-4 md:mb-0"><div class="flex items-center"><div class="w-8 h-8 amethyst-bg flex items-center justify-center text-white mr-2 rounded"><i class="fas fa-file-alt text-green-600"></i></div><span class="font-bold">LanRhyme的日志分析器</span></div><p class="text-sm text-gray-500 mt-2">by LanRhyme</p></div>
+                <div class="text-sm text-gray-500"><p>from <a href="https://lanrhyme.great-site.net" class="text-green-600 hover:text-green-800">https://lanrhyme.great-site.net</a></p><p>©2025</p></div>
             </div>
         </div>
     </footer>
 
-    <script>
-        // 图表初始化
-        document.addEventListener('DOMContentLoaded', function() {
-            // 错误类型图表
-            const errorCtx = document.getElementById('errorChart').getContext('2d');
-            new Chart(errorCtx, {
-                type: 'doughnut',
-                data: {
-                    labels: ['网络问题', '模组问题', '渲染器问题', '启动器本身', '其他'],
-                    datasets: [{
-                        data: [32, 18, 12, 8, 5],
-                        backgroundColor: [
-                            'rgba(239, 68, 68, 0.7)',
-                            'rgba(234, 179, 8, 0.7)',
-                            'rgba(59, 130, 246, 0.7)',
-                            'rgba(139, 92, 246, 0.7)',
-                            'rgba(75, 85, 99, 0.7)'
-                        ],
-                        borderWidth: 1
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            position: 'right',
-                        }
-                    }
-                }
-            });
+    <div id="custom-menu">
+        <div class="menu-header">常规操作</div>
+        <div class="menu-item" id="back-item" onclick="backAction()"><i class="fa fa-arrow-left"></i><span>返回</span></div>
+        <div class="menu-item" id="refresh-item" onclick="refreshAction()"><i class="fa fa-refresh"></i><span>刷新</span></div>
+        <div class="menu-divider"></div>
+        <div class="menu-header">编辑操作</div>
+        <div class="menu-item" id="copy-item" onclick="copyAction()"><i class="fa fa-copy"></i><span>复制</span></div>
+        <div class="menu-item" id="paste-item" onclick="pasteAction()"><i class="fa fa-paste"></i><span>粘贴</span></div>
+        <div class="menu-divider"></div>
+        <div class="menu-header">链接操作</div>
+        <div class="menu-item" id="open-in-new-tab-item" onclick="openInNewTabAction()"><i class="fa fa-external-link"></i><span>在新标签页打开</span></div>
+        <div class="menu-item" id="copy-link-item" onclick="copyLinkAction()"><i class="fa fa-link"></i><span>复制链接地址</span></div>
+        <div class="menu-divider"></div>
+        <div class="menu-header">其他操作</div>
+        <div class="menu-item" id="back-to-home-item" onclick="backToHomeAction()"><i class="fa fa-home"></i><span>返回主页</span></div>
+    </div>
 
-            // 上传日志图表
+    <script>
+        // Custom Right-Click Menu JavaScript
+        const customMenu = document.getElementById('custom-menu');
+        const backItem = document.getElementById('back-item');
+        const refreshItem = document.getElementById('refresh-item');
+        const copyItem = document.getElementById('copy-item');
+        const pasteItem = document.getElementById('paste-item');
+        const openInNewTabItem = document.getElementById('open-in-new-tab-item');
+        const copyLinkItem = document.getElementById('copy-link-item');
+        const backToHomeItem = document.getElementById('back-to-home-item');
+        let isMenuVisible = false, currentTarget = null, selectedText = '', isAnimating = false, menuOpenTime = 0, focusedElementBeforeMenu = null, scrollTimer = null, touchStartY = 0;
+        document.addEventListener('wheel', handleScroll, { passive: true });
+        document.addEventListener('touchstart', (e) => { if (isMenuVisible) { touchStartY = e.touches[0].clientY; } }, { passive: true });
+        document.addEventListener('touchmove', (e) => { if (isMenuVisible) { const touchY = e.touches[0].clientY; const diff = Math.abs(touchY - touchStartY); if (diff > 5) { hideMenu(); } } }, { passive: true });
+        window.addEventListener('scroll', handleScroll, { passive: true });
+        function handleScroll() { if (isMenuVisible) { if (scrollTimer) { clearTimeout(scrollTimer); } scrollTimer = setTimeout(() => { hideMenu(); }, 50); } }
+        document.addEventListener('contextmenu', function (e) {
+            e.preventDefault();
+            focusedElementBeforeMenu = document.activeElement;
+            const now = Date.now();
+            const isNewOpen = !isMenuVisible || (now - menuOpenTime > 300);
+            selectedText = window.getSelection().toString();
+            currentTarget = e.target.closest('a');
+            updateMenuItemsVisibility();
+            customMenu.style.display = 'block';
+            const menuRect = customMenu.getBoundingClientRect();
+            customMenu.style.display = 'none';
+            const menuWidth = menuRect.width;
+            const menuHeight = menuRect.height;
+            const viewportWidth = window.innerWidth;
+            const viewportHeight = window.innerHeight;
+            const clickX = e.clientX;
+            const clickY = e.clientY;
+            let left = clickX;
+            if (clickX + menuWidth > viewportWidth) { left = Math.max(0, viewportWidth - menuWidth); }
+            let top = clickY;
+            if (clickY + menuHeight > viewportHeight) { top = Math.max(0, clickY - menuHeight); }
+            if (isNewOpen) { showMenu(left, top); } else { moveMenu(left, top); }
+            menuOpenTime = now;
+        });
+        function showMenu(left, top) { if (isAnimating) return; isAnimating = true; customMenu.style.position = 'fixed'; customMenu.style.left = `${left}px`; customMenu.style.top = `${top}px`; customMenu.style.display = 'block'; customMenu.classList.remove('hiding'); requestAnimationFrame(() => { customMenu.classList.add('visible'); setTimeout(() => { isAnimating = false; isMenuVisible = true; }, 150); }); }
+        function moveMenu(left, top) { if (isAnimating) return; isAnimating = true; customMenu.style.position = 'fixed'; customMenu.style.left = `${left}px`; customMenu.style.top = `${top}px`; setTimeout(() => { isAnimating = false; }, 150); }
+        document.addEventListener('click', function (e) { if (!customMenu.contains(e.target) && isMenuVisible) { hideMenu(); } });
+        document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && isMenuVisible) { hideMenu(); } });
+        function updateMenuItemsVisibility() { backItem.style.display = 'flex'; refreshItem.style.display = 'flex'; copyItem.style.display = 'flex'; pasteItem.style.display = 'flex'; openInNewTabItem.style.display = 'flex'; copyLinkItem.style.display = 'flex'; backToHomeItem.style.display = 'flex'; if (currentTarget) { backItem.style.display = 'none'; refreshItem.style.display = 'none'; pasteItem.style.display = 'none'; } else { openInNewTabItem.style.display = 'none'; copyLinkItem.style.display = 'none'; } if (!selectedText) { copyItem.style.display = 'none'; } }
+        function hideMenu() { if (isAnimating) return; isAnimating = true; customMenu.classList.remove('visible'); customMenu.classList.add('hiding'); setTimeout(() => { customMenu.style.display = 'none'; customMenu.classList.remove('hiding'); isAnimating = false; isMenuVisible = false; }, 150); }
+        function backAction() { window.history.back(); hideMenu(); }
+        function refreshAction() { location.reload(); hideMenu(); }
+        function copyAction() { if (selectedText) { if (navigator.clipboard) { navigator.clipboard.writeText(selectedText).catch((err) => { fallbackCopyText(selectedText); }); } else { fallbackCopyText(selectedText); } } hideMenu(); }
+        function fallbackCopyText(text) { const textarea = document.createElement('textarea'); textarea.value = text; textarea.style.position = 'fixed'; textarea.style.opacity = '0'; document.body.appendChild(textarea); textarea.select(); document.execCommand('copy'); document.body.removeChild(textarea); }
+        function pasteAction() { const targetElement = focusedElementBeforeMenu; if (targetElement && (targetElement.tagName === 'INPUT' || targetElement.tagName === 'TEXTAREA' || targetElement.isContentEditable)) { if (navigator.clipboard) { navigator.clipboard.readText().then((clipboardText) => { if (typeof targetElement.execCommand === 'function') { document.execCommand('insertText', false, clipboardText); } }).catch((err) => {}); } } hideMenu(); }
+        function openInNewTabAction() { if (currentTarget) { window.open(currentTarget.href, '_blank'); } hideMenu(); }
+        function copyLinkAction() { if (currentTarget) { if (navigator.clipboard) { navigator.clipboard.writeText(currentTarget.href).catch((err) => { fallbackCopyText(currentTarget.href); }); } else { fallbackCopyText(currentTarget.href); } } hideMenu(); }
+        function backToHomeAction() { window.location.href = '/'; hideMenu(); }
+
+        // Original Page JavaScript
+        document.addEventListener('DOMContentLoaded', function() {
+            const errorCtx = document.getElementById('errorChart').getContext('2d');
+            new Chart(errorCtx, { type: 'doughnut', data: { labels: ['网络问题', '模组问题', '渲染器问题', '启动器本身', '其他'], datasets: [{ data: [32, 18, 12, 8, 5], backgroundColor: ['rgba(239, 68, 68, 0.7)', 'rgba(234, 179, 8, 0.7)', 'rgba(59, 130, 246, 0.7)', 'rgba(139, 92, 246, 0.7)', 'rgba(75, 85, 99, 0.7)'], borderWidth: 1 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'right', } } } });
             const uploadCtx = document.getElementById('uploadChart').getContext('2d');
-            new Chart(uploadCtx, {
-                type: 'bar',
-                data: {
-                    labels: ['周一', '周二', '周三', '周四', '周五', '周六', '周日'],
-                    datasets: [{
-                        label: '上传日志数量',
-                        data: [15, 18, 22, 20, 25, 30, 28],
-                        backgroundColor: 'rgba(10, 100, 10, 0.7)',
-                        borderWidth: 1
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            grid: {
-                                color: 'rgba(0, 0, 0, 0.05)'
-                            }
-                        },
-                        x: {
-                            grid: {
-                                display: false
-                            }
-                        }
-                    }
-                }
-            });
+            new Chart(uploadCtx, { type: 'bar', data: { labels: ['周一', '周二', '周三', '周四', '周五', '周六', '周日'], datasets: [{ label: '上传日志数量', data: [15, 18, 22, 20, 25, 30, 28], backgroundColor: 'rgba(10, 100, 10, 0.7)', borderWidth: 1 }] }, options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, grid: { color: 'rgba(0, 0, 0, 0.05)' } }, x: { grid: { display: false } } } } });
         });
 
-        // 页面滚动动画逻辑
         document.addEventListener("DOMContentLoaded", function() {
             const cards = document.querySelectorAll(".anim-card");
-            
-            function checkVisibility() {
-                cards.forEach(card => {
-                    const rect = card.getBoundingClientRect();
-                    const isVisible = 
-                        rect.top < (window.innerHeight || document.documentElement.clientHeight) && 
-                        rect.bottom >= 0;
-                    
-                    if (isVisible && !card.classList.contains('active')) {
-                        card.classList.add('active');
-                    }
-                });
-            }
-            
-            // 初始检查
+            function checkVisibility() { cards.forEach(card => { const rect = card.getBoundingClientRect(); const isVisible = rect.top < (window.innerHeight || document.documentElement.clientHeight) && rect.bottom >= 0; if (isVisible && !card.classList.contains('active')) { card.classList.add('active'); } }); }
             checkVisibility();
-            
-            // 滚动事件监听
             window.addEventListener("scroll", checkVisibility);
         });
 
-        // 日志上传与分析（异步体验）
+        // --- MODIFIED: Log Upload & Analysis with REAL API calls ---
         document.getElementById('uploadBtn').onclick = async function () {
             const fileInput = document.getElementById('logFile');
             const file = fileInput.files[0];
@@ -321,74 +306,82 @@
             const formData = new FormData();
             formData.append('file', file);
             const resultDiv = document.getElementById('analysisResult');
-            resultDiv.innerHTML = '<div class="text-gray-500">分析中，请稍候...</div>';
+            resultDiv.innerHTML = '<div class="text-gray-200">分析中，请稍候...</div>';
+
             try {
-                // 1. 先请求基础信息提取
+                // 1. Fetch extracted info from the server
                 const res1 = await fetch('/api/extract', { method: 'POST', body: formData });
                 const data1 = await res1.json();
                 if (data1.error) {
-                    resultDiv.innerHTML = `<div class="text-red-600">${data1.error}</div>`;
+                    resultDiv.innerHTML = `<div class="text-red-400">${data1.error}</div>`;
                     return;
                 }
-                // 显示基础信息卡片
-                let infoHtml = `<div class="result-card glassmorphism anim-card">
-                    <div class="result-title"><b>基础信息提取</b></div>
-                    <ul class="list-disc list-inside">`;
-                for (const k in data1.info) {
-                    infoHtml += `<li><b>${k}：</b>${data1.info[k]}</li>`;
+
+                // 2. Display basic info card with proper labels
+                const infoDisplayMap = {
+                    launcher_version: '启动器版本',
+                    java_version: 'Java 版本',
+                    renderer: '渲染器',
+                    minecraft_version: '游戏版本',
+                    keyword: '关键词'
+                };
+                let infoHtml = `<div class="result-card anim-card">
+                    <div class="text-lg font-bold text-gray-800">基础信息提取</div>
+                    <hr class="my-3 border-gray-600/10">
+                    <ul class="list-disc list-inside text-left">`;
+                for (const key in data1.info) {
+                    if (Object.prototype.hasOwnProperty.call(data1.info, key)) {
+                        const displayName = infoDisplayMap[key] || key;
+                        infoHtml += `<li><b>${displayName}：</b>${data1.info[key]}</li>`;
+                    }
                 }
                 infoHtml += '</ul></div>';
                 resultDiv.innerHTML = infoHtml;
+                
+                setTimeout(() => { document.querySelector('#analysisResult .anim-card').classList.add('active'); }, 50);
 
-                setTimeout(() => {
-                    document.querySelector('.anim-card').classList.add('active');
-                }, 100);
-
-                // 立即显示Gemini分析卡片
-                resultDiv.innerHTML += `<div id="geminiCard" class="result-card glassmorphism anim-card">
-                    <div class="result-title"><b>AI分析结果(gemini-2.5-flash)</b></div>
-                    <div class="text-gray-700">分析中，请稍候...</div>
+                // 3. Display Gemini analysis card placeholder
+                resultDiv.innerHTML += `<div id="geminiCard" class="result-card anim-card">
+                    <div class="text-lg font-bold text-gray-800">AI 分析结果</div>
+                    <hr class="my-3 border-gray-600/10">
+                    <div class="gemini-content text-left text-gray-700" style="white-space: pre-wrap; word-wrap: break-word;">分析中，请稍候...</div>
                 </div>`;
-
-                // 2. 异步请求Gemini分析
+                
+                setTimeout(() => { document.querySelector('#geminiCard').classList.add('active'); }, 250);
+                
+                // 4. Fetch AI analysis from the server
                 fetch('/api/gemini', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ log: data1.log, proxy: 'https://gemini-proxy.keyikai.me/' })
+                    body: JSON.stringify({ log: data1.log }) // Rely on server's .env for proxy/API key
                 })
                 .then(res2 => res2.json())
                 .then(data2 => {
-                    // 显示AI分析结果
-                    const aiResult = data2.gemini;
-                    const aiDiv = document.querySelector('#geminiCard .text-gray-700');
-                    aiDiv.innerText = aiResult;
+                    const aiDiv = document.querySelector('#geminiCard .gemini-content');
+                    aiDiv.innerText = data2.gemini; // innerText handles newlines correctly
 
-                    // 复制按钮（复制基础信息+AI分析）
+                    // 5. Add copy button
                     let copyBtn = document.createElement('button');
                     copyBtn.innerText = '复制分析内容';
                     copyBtn.className = 'mt-4 px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 transition-colors copy-btn';
-
                     copyBtn.onclick = function() {
-                        // 获取基础信息和AI分析内容
-                        const baseCard = document.querySelector('.result-card').innerText;
-                        const aiCard = document.querySelector('#geminiCard').innerText;
-                        const text = baseCard + '\n\n' + aiCard;
+                        const baseCardList = resultDiv.querySelectorAll('.result-card:not(#geminiCard) ul li');
+                        const baseCardText = Array.from(baseCardList).map(li => li.innerText).join('\n');
+                        const aiCardText = resultDiv.querySelector('#geminiCard .gemini-content').innerText;
+                        const text = `【基础信息】\n${baseCardText}\n\n【AI分析】\n${aiCardText}`;
                         navigator.clipboard.writeText(text).then(() => {
                             copyBtn.innerText = '已复制！';
                             setTimeout(() => { copyBtn.innerText = '复制分析内容'; }, 1500);
                         });
                     };
-
-                    // 避免重复插入
-                    let oldBtn = document.querySelector('#geminiCard .copy-btn');
-                    if (oldBtn) oldBtn.remove();
                     document.querySelector('#geminiCard').appendChild(copyBtn);
                 })
                 .catch(e => {
-                    document.querySelector('#geminiCard .text-gray-700').innerText = '分析失败：' + e.message;
+                    document.querySelector('#geminiCard .gemini-content').innerText = 'AI分析失败：' + e.message;
                 });
+                
             } catch (e) {
-                resultDiv.innerHTML = `<div class="text-red-600">分析失败：${e.message}</div>`;
+                resultDiv.innerHTML = `<div class="text-red-400">分析失败：${e.message}</div>`;
             }
         };
     </script>

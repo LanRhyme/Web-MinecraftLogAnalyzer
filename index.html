@@ -8,22 +8,157 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
     <style>
+        /* Define base variables for light theme */
+        :root {
+            --bg-primary: rgba(243, 244, 246, 0.8);
+            --text-primary: #1f2937;
+            --card-bg: rgba(255, 255, 255, 0.65);
+            --card-border: rgba(255, 255, 255, 0.2);
+            --card-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.1);
+            --amethyst-color: #357e3b;
+            --highlight-bg: rgba(203, 228, 194, 0.3);
+            --blob-gradient-start: rgba(143, 204, 102, 0.2);
+            --blob-gradient-end: rgba(120, 154, 75, 0.2);
+            --footer-bg: #fff;
+            --footer-text: #4b5563; /* text-gray-700 */
+            --footer-link: #10B981; /* green-600 */
+            --footer-link-hover: #059669; /* green-800 */
+
+            /* Custom menu colors */
+            --menu-bg: rgba(255, 255, 255, 0.7);
+            --menu-border: rgba(0, 0, 0, 0.1);
+            --menu-item-text: #374151;
+            --menu-item-icon: #6b7280;
+            --menu-item-hover-bg: #f3f4f6;
+            --menu-divider: #e5e7eb;
+            --menu-header-text: #9ca3af;
+
+            /* Specific elements based on their existing classes */
+            --text-gray-800: #1f2937;
+            --text-gray-700: #374151;
+            --text-gray-600: #4b5563;
+            --text-gray-500: #6b7280;
+            --text-gray-200: #e5e7eb; /* for "分析中，请稍候..." */
+            --text-red-400: #f87171; /* for error messages */
+            --border-gray-300: #d1d5db;
+            --focus-ring-green-500: #3d581a;
+            --placeholder-text-color: #6b7280; /* for input text-gray-600 */
+
+            /* Button colors (reusing amethyst-dark) */
+            --btn-bg-color: #4b814e;
+            --btn-hover-bg-color: #286516;
+            --btn-text-color: white;
+            --btn-icon-color: #d2e7d2;
+            --theme-toggle-icon-color: #4b5563; /* text-gray-700 */
+
+            /* Error card backgrounds */
+            --bg-red-50: #fef2f2;
+            --text-red-700: #b91c1c;
+            --bg-red-100: #fee2e2;
+            --text-red-800: #991b1b;
+
+            --bg-yellow-50: #fffbeb;
+            --text-yellow-700: #a16207;
+            --bg-yellow-100: #fef3c7;
+            --text-yellow-800: #854d09;
+
+            --bg-blue-50: #eff6ff;
+            --text-blue-700: #1d4ed8;
+            --bg-blue-100: #dbeafe;
+            --text-blue-800: #1e40af;
+        }
+
+        /* Dark theme variables */
+        .dark-mode {
+            --bg-primary: #1a202c; /* Dark charcoal */
+            --text-primary: #e2e8f0; /* Light gray */
+            --card-bg: rgba(45, 55, 72, 0.75); /* Darker transparent */
+            --card-border: rgba(60, 70, 80, 0.2);
+            --card-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+            --amethyst-color: #2c752f; /* Slightly brighter green for contrast */
+            --highlight-bg: rgba(68, 143, 85, 0.3);
+            --blob-gradient-start: rgba(60, 120, 80, 0.2);
+            --blob-gradient-end: rgba(40, 80, 60, 0.2);
+            --footer-bg: #2d3748; /* Dark gray */
+            --footer-text: #cbd5e0; /* light gray */
+            --footer-link: #81c784; /* lighter green */
+            --footer-link-hover: #66bb6a; /* even lighter green */
+
+            /* Custom menu colors for dark mode */
+            --menu-bg: rgba(45, 55, 72, 0.75);
+            --menu-border: rgba(255, 255, 255, 0.1);
+            --menu-item-text: #e2e8f0;
+            --menu-item-icon: #a0aec0;
+            --menu-item-hover-bg: #4a5568;
+            --menu-divider: #4a5568;
+            --menu-header-text: #a0aec0;
+
+            /* Specific elements for dark mode */
+            --text-gray-800: #e2e8f0;
+            --text-gray-700: #cbd5e0;
+            --text-gray-600: #a0aec0;
+            --text-gray-500: #718096;
+            --text-gray-200: #a0aec0; /* Darker gray for "分析中..." in dark mode */
+            --text-red-400: #fca5a5; /* lighter red for error messages in dark mode */
+            --border-gray-300: #4a5568;
+            --focus-ring-green-500: #68d391;
+            --placeholder-text-color: #a0aec0;
+
+            --btn-bg-color: #327a34;
+            --btn-hover-bg-color: #235e26;
+            --btn-text-color: white;
+            --btn-icon-color: #A5D6A7;
+            --theme-toggle-icon-color: #a0aec0; /* text-gray-400 */
+
+            /* Error card backgrounds for dark mode */
+            --bg-red-50: #4a1919;
+            --text-red-700: #ef4444;
+            --bg-red-100: #6b2f2f;
+            --text-red-800: #fca5a5;
+
+            --bg-yellow-50: #4a3219;
+            --text-yellow-700: #facc15;
+            --bg-yellow-100: #6b4d2f;
+            --text-yellow-800: #fde68a;
+
+            --bg-blue-50: #192d4a;
+            --text-blue-700: #60a5fa;
+            --bg-blue-100: #2f4d6b;
+            --text-blue-800: #93c5fd;
+        }
+
+        /* Apply variables */
         body {
             font-family: 'Inter', sans-serif;
-            background-color: rgba(243, 244, 246, 0.8);
-            color: #1f2937;
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            transition: background-color 0.3s ease, color 0.3s ease; /* Smooth transition */
         }
         .glassmorphism {
-            background: rgba(255, 255, 255, 0.65);
+            background: var(--card-bg);
             backdrop-filter: blur(12px);
             border-radius: 20px;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.1);
+            border: 1px solid var(--card-border);
+            box-shadow: var(--card-shadow);
             transition: all 0.3s ease;
         }
         .amethyst-dark {
-            background-color: #357e3b;
+            background-color: var(--btn-bg-color);
         }
+        .amethyst-dark:hover {
+            background-color: var(--btn-hover-bg-color);
+        }
+        .amethyst-dark .text-green-600 { /* For icons inside amethyst-dark button */
+            color: var(--btn-icon-color);
+        }
+        /* Applied to the w-10 h-10 container in nav and section headers */
+        .amethyst-bg {
+            background-color: var(--amethyst-color);
+        }
+        .amethyst-bg .text-green-600 {
+            color: var(--btn-icon-color);
+        }
+
         .chart-container {
             height: 300px;
             width: 100%;
@@ -40,14 +175,14 @@
             left: 0;
             width: 100%;
             height: 6px;
-            background-color: rgba(131, 204, 102, 0.3);
+            background-color: var(--highlight-bg);
             z-index: -1;
         }
         .blob {
             position: absolute;
             width: 300px;
             height: 300px;
-            background: linear-gradient(135deg, rgba(143, 204, 102, 0.2) 0%, rgba(120, 154, 75, 0.2) 100%);
+            background: linear-gradient(135deg, var(--blob-gradient-start) 0%, var(--blob-gradient-end) 100%);
             filter: blur(60px);
             border-radius: 50%;
             z-index: -1;
@@ -57,13 +192,13 @@
             padding: 1.5rem !important;
             border-radius: 15px !important;
             margin-bottom: 1.5rem !important;
-            color: #374151 !important;
+            color: var(--text-gray-700) !important;
             position: relative !important;
             z-index: 1 !important;
-            background: rgba(255, 255, 255, 0.65) !important;
+            background: var(--card-bg) !important;
             backdrop-filter: blur(12px);
-            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: var(--card-shadow) !important;
+            border: 1px solid var(--card-border);
         }
         .anim-card {
             opacity: 0;
@@ -83,7 +218,11 @@
             pointer-events: none;
             background: url('img/mc1.jpg') center center no-repeat;
             background-size: cover;
-            filter: blur(16px) brightness(0.7);
+            filter: blur(16px) brightness(0.7); /* Light mode filter */
+            transition: filter 0.3s ease;
+        }
+        .dark-mode .mc-bg-blur {
+            filter: blur(16px) brightness(0.3) saturate(1.2); /* Darker and slightly more saturated for dark mode */
         }
         @keyframes blob-movement {
             0% { transform: translate(0, 0) scale(1); }
@@ -94,10 +233,10 @@
         #custom-menu {
             display: none;
             position: fixed;
-            background: rgba(255, 255, 255, 0.7);
+            background: var(--menu-bg);
             backdrop-filter: blur(10px);
             border-radius: 15px;
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); /* original shadow */
             padding: 0.5rem 0;
             z-index: 9999;
             min-width: 180px;
@@ -106,16 +245,74 @@
             transform-origin: top left;
             opacity: 0;
             transform: scale(0.95);
-            border: 1px solid rgba(0, 0, 0, 0.1);
+            border: 1px solid var(--menu-border);
             user-select: none;
+        }
+        .dark-mode #custom-menu {
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3), 0 4px 6px -2px rgba(0, 0, 0, 0.15); /* Adjusted shadow for dark mode */
         }
         #custom-menu.visible { opacity: 1; transform: scale(1); }
         #custom-menu.hiding { opacity: 0; transform: scale(0.95); }
-        .menu-item { display: flex; align-items: center; padding: 0.75rem 1.25rem; cursor: pointer; transition: all 0.2s ease; color: #374151; }
-        .menu-item:hover { background-color: #f3f4f6; border-radius: 15px; }
-        .menu-item i { width: 1.5rem; margin-right: 0.75rem; color: #6b7280; }
-        .menu-divider { border-top: 1px solid #e5e7eb; margin: 0.25rem 0; }
-        .menu-header { padding: 0.5rem 1.25rem; font-size: 0.875rem; color: #9ca3af; text-transform: uppercase; font-weight: 500; }
+        .menu-item { display: flex; align-items: center; padding: 0.75rem 1.25rem; cursor: pointer; transition: all 0.2s ease; color: var(--menu-item-text); }
+        .menu-item:hover { background-color: var(--menu-item-hover-bg); border-radius: 15px; }
+        .menu-item i { width: 1.5rem; margin-right: 0.75rem; color: var(--menu-item-icon); }
+        .menu-divider { border-top: 1px solid var(--menu-divider); margin: 0.25rem 0; }
+        .menu-header { padding: 0.5rem 1.25rem; font-size: 0.875rem; color: var(--menu-header-text); text-transform: uppercase; font-weight: 500; }
+
+        /* Tailwind overrides using variables */
+        .text-gray-800 { color: var(--text-gray-800) !important; }
+        .text-gray-700 { color: var(--text-gray-700) !important; }
+        .text-gray-600 { color: var(--text-gray-600) !important; }
+        .text-gray-500 { color: var(--text-gray-500) !important; }
+        .text-gray-200 { color: var(--text-gray-200) !important; } /* Used for "分析中，请稍候..." */
+        .text-red-400 { color: var(--text-red-400) !important; } /* Used for error messages */
+
+        #theme-toggle .text-gray-700 {
+            color: var(--theme-toggle-icon-color);
+        }
+
+        input[type="file"], input[type="text"], textarea {
+            border-color: var(--border-gray-300);
+            color: var(--text-primary); /* Ensure input text color changes */
+            background-color: var(--card-bg); /* Input background should follow card bg */
+            transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;
+        }
+        input[type="file"]::placeholder, input[type="text"]::placeholder, textarea::placeholder { /* Adjust placeholder color */
+            color: var(--placeholder-text-color);
+        }
+        input[type="file"]:focus, input[type="text"]:focus, textarea:focus {
+            outline: none; /* Remove default focus outline */
+            border-color: var(--focus-ring-green-500); /* Apply border color */
+            box-shadow: 0 0 0 2px var(--focus-ring-green-500); /* Apply custom focus ring */
+        }
+
+        .bg-red-50 { background-color: var(--bg-red-50); transition: background-color 0.3s ease; }
+        .text-red-700 { color: var(--text-red-700); transition: color 0.3s ease; }
+        .bg-red-100 { background-color: var(--bg-red-100); transition: background-color 0.3s ease; }
+        .text-red-800 { color: var(--text-red-800); transition: color 0.3s ease; }
+
+        .bg-yellow-50 { background-color: var(--bg-yellow-50); transition: background-color 0.3s ease; }
+        .text-yellow-700 { color: var(--text-yellow-700); transition: color 0.3s ease; }
+        .bg-yellow-100 { background-color: var(--bg-yellow-100); transition: background-color 0.3s ease; }
+        .text-yellow-800 { color: var(--text-yellow-800); transition: color 0.3s ease; }
+
+        .bg-blue-50 { background-color: var(--bg-blue-50); transition: background-color 0.3s ease; }
+        .text-blue-700 { color: var(--text-blue-700); transition: color 0.3s ease; }
+        .bg-blue-100 { background-color: var(--bg-blue-100); transition: background-color 0.3s ease; }
+        .text-blue-800 { color: var(--text-blue-800); transition: color 0.3s ease; }
+
+        footer {
+            background-color: var(--footer-bg);
+            color: var(--footer-text);
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+        footer a {
+            color: var(--footer-link);
+            transition: color 0.3s ease;
+        }
+        footer a:hover {
+            color: var(--footer-link-hover);
+        }
     </style>
 </head>
 <body class="min-h-screen relative overflow-x-hidden">
@@ -131,16 +328,21 @@
                 </div>
                 <h1 class="text-xl font-bold text-gray-800">Minecraft-ios日志分析器</h1>
             </div>
-            <a href="https://lanrhyme.great-site.net" class="amethyst-dark text-white px-6 py-3 rounded-lg font-medium hover:bg-green-800 transition-colors">
-                <i class="fas fa-arrow-left mr-2 text-green-600"></i>返回LanRhyme的个人网站
-            </a>
+            <div class="flex items-center">
+                <button id="theme-toggle" class="p-2 rounded-full focus:outline-none focus:ring-2 focus:ring-green-500 mr-4">
+                    <i class="fas fa-moon text-gray-700 text-xl"></i>
+                </button>
+                <a href="https://lanrhyme.great-site.net" class="amethyst-dark text-white px-6 py-3 rounded-lg font-medium hover:bg-green-800 transition-colors">
+                    <i class="fas fa-arrow-left mr-2 text-green-600"></i>返回LanRhyme的个人网站
+                </a>
+            </div>
         </div>
     </nav>
 
-    <header class="amethyst-bg text-white py-16 relative overflow-hidden">
+    <header class="glassmorphism py-16 relative overflow-hidden">
         <div class="container mx-auto px-4 text-center relative z-10">
-            <h1 class="text-4xl md:text-5xl font-bold mb-4">Minecraft日志分析器</h1>
-            <p class="text-xl md:text-2xl mb-8">Amethyst(Pojav)-IOS专用，其他启动器可能也可以？</p>
+            <h1 class="text-4xl md:text-5xl font-bold mb-4 text-gray-800">Minecraft日志分析器</h1>
+            <p class="text-xl md:text-2xl mb-8 text-gray-700">Amethyst(Pojav)-IOS专用，其他启动器可能也可以？</p>
             <div class="max-w-3xl mx-auto glassmorphism p-6">
                 <div class="flex flex-col md:flex-row gap-4">
                     <input id="logFile" type="file" class="flex-grow p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500" accept=".log,.txt">
@@ -156,7 +358,7 @@
 
     <section id="analysis" class="container mx-auto py-12 px-4">
         <div class="glassmorphism p-6 mb-8 anim-card">
-            <h3 class="text-2xl font-semibold mb-4 flex items-center">
+            <h3 class="text-2xl font-semibold mb-4 flex items-center text-gray-800">
                 <span class="w-10 h-10 amethyst-bg rounded-full flex items-center justify-center text-white mr-3">
                     <i class="fas fa-exclamation-triangle text-green-600"></i>
                 </span>
@@ -187,7 +389,7 @@
 
     <section id="visualization" class="container mx-auto py-12 px-4">
         <div class="glassmorphism p-6 anim-card">
-            <h3 class="text-2xl font-semibold mb-4 flex items-center">
+            <h3 class="text-2xl font-semibold mb-4 flex items-center text-gray-800">
                 <span class="w-10 h-10 amethyst-bg rounded-full flex items-center justify-center text-white mr-3">
                     <i class="fas fa-chart-line text-green-600"></i>
                 </span>
@@ -280,13 +482,121 @@
         function copyLinkAction() { if (currentTarget) { if (navigator.clipboard) { navigator.clipboard.writeText(currentTarget.href).catch((err) => { fallbackCopyText(currentTarget.href); }); } else { fallbackCopyText(currentTarget.href); } } hideMenu(); }
         function backToHomeAction() { window.location.href = '/'; hideMenu(); }
 
-        // Original Page JavaScript
+        // Theme Toggle JavaScript
+        const themeToggleBtn = document.getElementById('theme-toggle');
+        const themeToggleIcon = themeToggleBtn.querySelector('i');
+
+        function setTheme(theme) {
+            if (theme === 'dark') {
+                document.documentElement.classList.add('dark-mode');
+                themeToggleIcon.classList.remove('fa-moon');
+                themeToggleIcon.classList.add('fa-sun');
+                localStorage.setItem('theme', 'dark');
+            } else {
+                document.documentElement.classList.remove('dark-mode');
+                themeToggleIcon.classList.remove('fa-sun');
+                themeToggleIcon.classList.add('fa-moon');
+                localStorage.setItem('theme', 'light');
+            }
+        }
+
+        function loadTheme() {
+            // Check for user's preferred color scheme first
+            const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+            const savedTheme = localStorage.getItem('theme');
+
+            if (savedTheme) {
+                setTheme(savedTheme);
+            } else if (prefersDark) {
+                setTheme('dark');
+            } else {
+                setTheme('light'); // Default to light if no preference
+            }
+        }
+
         document.addEventListener('DOMContentLoaded', function() {
+            loadTheme(); // Load theme when DOM is ready
+
+            // Initialize Chart.js charts
             const errorCtx = document.getElementById('errorChart').getContext('2d');
-            new Chart(errorCtx, { type: 'doughnut', data: { labels: ['网络问题', '模组问题', '渲染器问题', '启动器本身', '其他'], datasets: [{ data: [32, 18, 12, 8, 5], backgroundColor: ['rgba(239, 68, 68, 0.7)', 'rgba(234, 179, 8, 0.7)', 'rgba(59, 130, 246, 0.7)', 'rgba(139, 92, 246, 0.7)', 'rgba(75, 85, 99, 0.7)'], borderWidth: 1 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'right', } } } });
+            new Chart(errorCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['网络问题', '模组问题', '渲染器问题', '启动器本身', '其他'],
+                    datasets: [{
+                        data: [32, 18, 12, 8, 5],
+                        backgroundColor: ['rgba(239, 68, 68, 0.7)', 'rgba(234, 179, 8, 0.7)', 'rgba(59, 130, 246, 0.7)', 'rgba(139, 92, 246, 0.7)', 'rgba(75, 85, 99, 0.7)'],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'right',
+                            labels: {
+                                color: 'var(--text-primary)' // Dynamic text color for legend labels
+                            }
+                        }
+                    }
+                }
+            });
+
             const uploadCtx = document.getElementById('uploadChart').getContext('2d');
-            new Chart(uploadCtx, { type: 'bar', data: { labels: ['周一', '周二', '周三', '周四', '周五', '周六', '周日'], datasets: [{ label: '上传日志数量', data: [15, 18, 22, 20, 25, 30, 28], backgroundColor: 'rgba(10, 100, 10, 0.7)', borderWidth: 1 }] }, options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, grid: { color: 'rgba(0, 0, 0, 0.05)' } }, x: { grid: { display: false } } } } });
+            new Chart(uploadCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['周一', '周二', '周三', '周四', '周五', '周六', '周日'],
+                    datasets: [{
+                        label: '上传日志数量',
+                        data: [15, 18, 22, 20, 25, 30, 28],
+                        backgroundColor: 'rgba(10, 100, 10, 0.7)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: {
+                                color: 'rgba(0, 0, 0, 0.05)'
+                            },
+                            ticks: {
+                                color: 'var(--text-primary)' // Dynamic text color for y-axis ticks
+                            }
+                        },
+                        x: {
+                            grid: {
+                                display: false
+                            },
+                            ticks: {
+                                color: 'var(--text-primary)' // Dynamic text color for x-axis ticks
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            labels: {
+                                color: 'var(--text-primary)' // Dynamic text color for legend labels
+                            }
+                        }
+                    }
+                }
+            });
         });
+
+        // Toggle theme on button click
+        themeToggleBtn.addEventListener('click', () => {
+            if (document.documentElement.classList.contains('dark-mode')) {
+                setTheme('light');
+            } else {
+                setTheme('dark');
+            }
+        });
+
 
         document.addEventListener("DOMContentLoaded", function() {
             const cards = document.querySelectorAll(".anim-card");
@@ -306,7 +616,7 @@
             const formData = new FormData();
             formData.append('file', file);
             const resultDiv = document.getElementById('analysisResult');
-            resultDiv.innerHTML = '<div class="text-gray-200">分析中，请稍候...</div>';
+            resultDiv.innerHTML = `<div class="text-gray-200">分析中，请稍候...</div>`;
 
             try {
                 // 1. Fetch extracted info from the server
@@ -337,7 +647,7 @@
                 }
                 infoHtml += '</ul></div>';
                 resultDiv.innerHTML = infoHtml;
-                
+
                 setTimeout(() => { document.querySelector('#analysisResult .anim-card').classList.add('active'); }, 50);
 
                 // 3. Display Gemini analysis card placeholder
@@ -346,9 +656,9 @@
                     <hr class="my-3 border-gray-600/10">
                     <div class="gemini-content text-left text-gray-700" style="white-space: pre-wrap; word-wrap: break-word;">分析中，请稍候...</div>
                 </div>`;
-                
+
                 setTimeout(() => { document.querySelector('#geminiCard').classList.add('active'); }, 250);
-                
+
                 // 4. Fetch AI analysis from the server
                 fetch('/api/gemini', {
                     method: 'POST',
@@ -379,7 +689,7 @@
                 .catch(e => {
                     document.querySelector('#geminiCard .gemini-content').innerText = 'AI分析失败：' + e.message;
                 });
-                
+
             } catch (e) {
                 resultDiv.innerHTML = `<div class="text-red-400">分析失败：${e.message}</div>`;
             }

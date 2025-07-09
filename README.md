@@ -42,10 +42,12 @@
 ```bash
 # 安装依赖
 npm install
+npm install dotenv
 
 # 设置环境变量（创建.env文件）
-GEMINI_API_KEY=your_gemini_api_key
-GEMINI_PROXY_TARGET=https://gemini-proxy.your-domain.com/
+GEMINI_API_KEY=your_gemini_api_key    #设置api key，在此处获取https://aistudio.google.com/app/apikey
+GEMINI_PROXY_TARGET=https://generativelanguage.googleapis.com/   #设置代理地址，用于访问Gemini API，默认无反向代理https://generativelanguage.googleapis.com/
+CUSTOM_KEYWORDS=sodium|iris|xaero|customskinloader   #设置关键词，用于日志关键词检测，使用 | 进行分隔
 ```
 
 ### 2. 运行服务

@@ -4,8 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Minecraft日志分析器</title>
-    <script src="https://cdn.tailwindcss.com/3.3.3"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+    <script src="https://cdn.tailwindcss.com/3.3.3"></script> <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
     <style>
         /* Define base variables for light theme */
@@ -313,6 +312,45 @@
         footer a:hover {
             color: var(--footer-link-hover);
         }
+
+        /* Warning Popup Styles */
+        .warning-popup {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: var(--card-bg);
+            backdrop-filter: blur(12px);
+            border-radius: 15px;
+            border: 1px solid var(--card-border);
+            box-shadow: var(--card-shadow);
+            padding: 2rem;
+            z-index: 10000;
+            text-align: center;
+            max-width: 400px;
+            width: 90%;
+            color: var(--text-primary);
+        }
+        .warning-popup h3 {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--text-red-700);
+            margin-bottom: 1rem;
+        }
+        .warning-popup p {
+            margin-bottom: 1rem;
+            color: var(--text-gray-700);
+        }
+        .warning-popup button {
+            background-color: var(--btn-bg-color);
+            color: var(--btn-text-color);
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            transition: background-color 0.3s ease;
+        }
+        .warning-popup button:hover {
+            background-color: var(--btn-hover-bg-color);
+        }
     </style>
 </head>
 <body class="min-h-screen relative overflow-x-hidden">
@@ -425,6 +463,13 @@
         <div class="menu-divider"></div>
         <div class="menu-header">其他操作</div>
         <div class="menu-item" id="back-to-home-item" onclick="backToHomeAction()"><i class="fa fa-home"></i><span>返回主页</span></div>
+    </div>
+
+    <div id="warningPopup" class="warning-popup hidden">
+        <h3>警告!</h3>
+        <p>检测到关键词:<br><strong id="warningKeyword"></strong></p>
+        <p id="warningDescription"></p>
+        <button onclick="hideWarningPopup()">确定</button>
     </div>
 
     <script>
@@ -605,6 +650,17 @@
             window.addEventListener("scroll", checkVisibility);
         });
 
+        // Warning Popup Functions
+        function showWarningPopup(keyword, description) {
+            document.getElementById('warningKeyword').innerText = keyword;
+            document.getElementById('warningDescription').innerText = description;
+            document.getElementById('warningPopup').classList.remove('hidden');
+        }
+
+        function hideWarningPopup() {
+            document.getElementById('warningPopup').classList.add('hidden');
+        }
+
         // --- MODIFIED: Log Upload & Analysis with REAL API calls ---
         document.getElementById('uploadBtn').onclick = async function () {
             const fileInput = document.getElementById('logFile');
@@ -627,13 +683,23 @@
                     return;
                 }
 
+                // Check for keyword and show warning
+                if (data1.info.keyword) {
+                    let keywordDescription = "由开发者添加，这可能是导致游戏崩溃的主要原因，一般来说是模组文件，请检查你的mod列表";
+                    showWarningPopup(data1.info.keyword, keywordDescription);
+                }
+
+
                 // 2. Display basic info card with proper labels
                 const infoDisplayMap = {
+                    device: '设备',
+                    os: '操作系统',
                     launcher_version: '启动器版本',
+                    commit: '提交版本号',
                     java_version: 'Java 版本',
                     renderer: '渲染器',
                     minecraft_version: '游戏版本',
-                    keyword: '关键词'
+                    keyword: '可能导致崩溃的关键词'
                 };
                 let infoHtml = `<div class="result-card anim-card">
                     <div class="text-lg font-bold text-gray-800">基础信息提取</div>

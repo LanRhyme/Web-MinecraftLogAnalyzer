@@ -1,11 +1,14 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Minecraft日志分析器</title>
-    <script src="https://cdn.tailwindcss.com/3.3.3"></script> <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+    <script src="https://cdn.tailwindcss.com/3.3.3"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <style>
         /* Define base variables for light theme */
         :root {
@@ -19,9 +22,12 @@
             --blob-gradient-start: rgba(143, 204, 102, 0.2);
             --blob-gradient-end: rgba(120, 154, 75, 0.2);
             --footer-bg: #fff;
-            --footer-text: #4b5563; /* text-gray-700 */
-            --footer-link: #10B981; /* green-600 */
-            --footer-link-hover: #059669; /* green-800 */
+            --footer-text: #4b5563;
+            /* text-gray-700 */
+            --footer-link: #10B981;
+            /* green-600 */
+            --footer-link-hover: #059669;
+            /* green-800 */
 
             /* Custom menu colors */
             --menu-bg: rgba(255, 255, 255, 0.7);
@@ -37,18 +43,22 @@
             --text-gray-700: #374151;
             --text-gray-600: #4b5563;
             --text-gray-500: #6b7280;
-            --text-gray-200: #e5e7eb; /* for "分析中，请稍候..." */
-            --text-red-400: #f87171; /* for error messages */
+            --text-gray-200: #e5e7eb;
+            /* for "分析中，请稍候..." */
+            --text-red-400: #f87171;
+            /* for error messages */
             --border-gray-300: #d1d5db;
             --focus-ring-green-500: #3d581a;
-            --placeholder-text-color: #6b7280; /* for input text-gray-600 */
+            --placeholder-text-color: #6b7280;
+            /* for input text-gray-600 */
 
             /* Button colors (reusing amethyst-dark) */
             --btn-bg-color: #4b814e;
             --btn-hover-bg-color: #286516;
             --btn-text-color: white;
             --btn-icon-color: #d2e7d2;
-            --theme-toggle-icon-color: #4b5563; /* text-gray-700 */
+            --theme-toggle-icon-color: #4b5563;
+            /* text-gray-700 */
 
             /* Error card backgrounds */
             --bg-red-50: #fef2f2;
@@ -69,19 +79,27 @@
 
         /* Dark theme variables */
         .dark-mode {
-            --bg-primary: #1a202c; /* Dark charcoal */
-            --text-primary: #e2e8f0; /* Light gray */
-            --card-bg: rgba(45, 55, 72, 0.75); /* Darker transparent */
+            --bg-primary: #1a202c;
+            /* Dark charcoal */
+            --text-primary: #e2e8f0;
+            /* Light gray */
+            --card-bg: rgba(45, 55, 72, 0.75);
+            /* Darker transparent */
             --card-border: rgba(60, 70, 80, 0.2);
             --card-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
-            --amethyst-color: #2c752f; /* Slightly brighter green for contrast */
+            --amethyst-color: #2c752f;
+            /* Slightly brighter green for contrast */
             --highlight-bg: rgba(68, 143, 85, 0.3);
             --blob-gradient-start: rgba(60, 120, 80, 0.2);
             --blob-gradient-end: rgba(40, 80, 60, 0.2);
-            --footer-bg: #2d3748; /* Dark gray */
-            --footer-text: #cbd5e0; /* light gray */
-            --footer-link: #81c784; /* lighter green */
-            --footer-link-hover: #66bb6a; /* even lighter green */
+            --footer-bg: #2d3748;
+            /* Dark gray */
+            --footer-text: #cbd5e0;
+            /* light gray */
+            --footer-link: #81c784;
+            /* lighter green */
+            --footer-link-hover: #66bb6a;
+            /* even lighter green */
 
             /* Custom menu colors for dark mode */
             --menu-bg: rgba(45, 55, 72, 0.75);
@@ -97,8 +115,10 @@
             --text-gray-700: #cbd5e0;
             --text-gray-600: #a0aec0;
             --text-gray-500: #718096;
-            --text-gray-200: #a0aec0; /* Darker gray for "分析中..." in dark mode */
-            --text-red-400: #fca5a5; /* lighter red for error messages in dark mode */
+            --text-gray-200: #a0aec0;
+            /* Darker gray for "分析中..." in dark mode */
+            --text-red-400: #fca5a5;
+            /* lighter red for error messages in dark mode */
             --border-gray-300: #4a5568;
             --focus-ring-green-500: #68d391;
             --placeholder-text-color: #a0aec0;
@@ -107,7 +127,8 @@
             --btn-hover-bg-color: #235e26;
             --btn-text-color: white;
             --btn-icon-color: #A5D6A7;
-            --theme-toggle-icon-color: #a0aec0; /* text-gray-400 */
+            --theme-toggle-icon-color: #a0aec0;
+            /* text-gray-400 */
 
             /* Error card backgrounds for dark mode */
             --bg-red-50: #4a1919;
@@ -131,8 +152,10 @@
             font-family: 'Inter', sans-serif;
             background-color: var(--bg-primary);
             color: var(--text-primary);
-            transition: background-color 0.3s ease, color 0.3s ease; /* Smooth transition */
+            transition: background-color 0.3s ease, color 0.3s ease;
+            /* Smooth transition */
         }
+
         .glassmorphism {
             background: var(--card-bg);
             backdrop-filter: blur(12px);
@@ -141,19 +164,25 @@
             box-shadow: var(--card-shadow);
             transition: all 0.3s ease;
         }
+
         .amethyst-dark {
             background-color: var(--btn-bg-color);
         }
+
         .amethyst-dark:hover {
             background-color: var(--btn-hover-bg-color);
         }
-        .amethyst-dark .text-green-600 { /* For icons inside amethyst-dark button */
+
+        .amethyst-dark .text-green-600 {
+            /* For icons inside amethyst-dark button */
             color: var(--btn-icon-color);
         }
+
         /* Applied to the w-10 h-10 container in nav and section headers */
         .amethyst-bg {
             background-color: var(--amethyst-color);
         }
+
         .amethyst-bg .text-green-600 {
             color: var(--btn-icon-color);
         }
@@ -163,10 +192,12 @@
             width: 100%;
             position: relative;
         }
+
         .highlight-text {
             position: relative;
             display: inline-block;
         }
+
         .highlight-text::after {
             content: '';
             position: absolute;
@@ -177,6 +208,7 @@
             background-color: var(--highlight-bg);
             z-index: -1;
         }
+
         .blob {
             position: absolute;
             width: 300px;
@@ -187,6 +219,7 @@
             z-index: -1;
             animation: blob-movement 15s infinite linear;
         }
+
         #analysisResult .result-card {
             padding: 1.5rem !important;
             border-radius: 15px !important;
@@ -199,43 +232,66 @@
             box-shadow: var(--card-shadow) !important;
             border: 1px solid var(--card-border);
         }
+
         .anim-card {
             opacity: 0;
             transform: translateY(30px);
             transition: all 0.8s cubic-bezier(0.2, 0.8, 0.2, 1);
         }
+
         .anim-card.active {
             opacity: 1;
             transform: translateY(0);
         }
+
         .mc-bg-blur {
             position: fixed;
             z-index: -1;
-            top: 0; left: 0; right: 0; bottom: 0;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
             width: 100vw;
             height: 100vh;
             pointer-events: none;
             background: url('img/mc1.jpg') center center no-repeat;
             background-size: cover;
-            filter: blur(16px) brightness(0.7); /* Light mode filter */
+            filter: blur(16px) brightness(0.7);
+            /* Light mode filter */
             transition: filter 0.3s ease;
         }
+
         .dark-mode .mc-bg-blur {
-            filter: blur(16px) brightness(0.3) saturate(1.2); /* Darker and slightly more saturated for dark mode */
+            filter: blur(16px) brightness(0.3) saturate(1.2);
+            /* Darker and slightly more saturated for dark mode */
         }
+
         @keyframes blob-movement {
-            0% { transform: translate(0, 0) scale(1); }
-            33% { transform: translate(5%, -10%) scale(1.3); }
-            66% { transform: translate(-15%, 5%) scale(0.9); }
-            100% { transform: translate(0, 0) scale(1); }
+            0% {
+                transform: translate(0, 0) scale(1);
+            }
+
+            33% {
+                transform: translate(5%, -10%) scale(1.3);
+            }
+
+            66% {
+                transform: translate(-15%, 5%) scale(0.9);
+            }
+
+            100% {
+                transform: translate(0, 0) scale(1);
+            }
         }
+
         #custom-menu {
             display: none;
             position: fixed;
             background: var(--menu-bg);
             backdrop-filter: blur(10px);
             border-radius: 15px;
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); /* original shadow */
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            /* original shadow */
             padding: 0.5rem 0;
             z-index: 9999;
             min-width: 180px;
@@ -247,68 +303,187 @@
             border: 1px solid var(--menu-border);
             user-select: none;
         }
+
         .dark-mode #custom-menu {
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3), 0 4px 6px -2px rgba(0, 0, 0, 0.15); /* Adjusted shadow for dark mode */
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3), 0 4px 6px -2px rgba(0, 0, 0, 0.15);
+            /* Adjusted shadow for dark mode */
         }
-        #custom-menu.visible { opacity: 1; transform: scale(1); }
-        #custom-menu.hiding { opacity: 0; transform: scale(0.95); }
-        .menu-item { display: flex; align-items: center; padding: 0.75rem 1.25rem; cursor: pointer; transition: all 0.2s ease; color: var(--menu-item-text); }
-        .menu-item:hover { background-color: var(--menu-item-hover-bg); border-radius: 15px; }
-        .menu-item i { width: 1.5rem; margin-right: 0.75rem; color: var(--menu-item-icon); }
-        .menu-divider { border-top: 1px solid var(--menu-divider); margin: 0.25rem 0; }
-        .menu-header { padding: 0.5rem 1.25rem; font-size: 0.875rem; color: var(--menu-header-text); text-transform: uppercase; font-weight: 500; }
+
+        #custom-menu.visible {
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        #custom-menu.hiding {
+            opacity: 0;
+            transform: scale(0.95);
+        }
+
+        .menu-item {
+            display: flex;
+            align-items: center;
+            padding: 0.75rem 1.25rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            color: var(--menu-item-text);
+        }
+
+        .menu-item:hover {
+            background-color: var(--menu-item-hover-bg);
+            border-radius: 15px;
+        }
+
+        .menu-item i {
+            width: 1.5rem;
+            margin-right: 0.75rem;
+            color: var(--menu-item-icon);
+        }
+
+        .menu-divider {
+            border-top: 1px solid var(--menu-divider);
+            margin: 0.25rem 0;
+        }
+
+        .menu-header {
+            padding: 0.5rem 1.25rem;
+            font-size: 0.875rem;
+            color: var(--menu-header-text);
+            text-transform: uppercase;
+            font-weight: 500;
+        }
 
         /* Tailwind overrides using variables */
-        .text-gray-800 { color: var(--text-gray-800) !important; }
-        .text-gray-700 { color: var(--text-gray-700) !important; }
-        .text-gray-600 { color: var(--text-gray-600) !important; }
-        .text-gray-500 { color: var(--text-gray-500) !important; }
-        .text-gray-200 { color: var(--text-gray-200) !important; } /* Used for "分析中，请稍候..." */
-        .text-red-400 { color: var(--text-red-400) !important; } /* Used for error messages */
+        .text-gray-800 {
+            color: var(--text-gray-800) !important;
+        }
+
+        .text-gray-700 {
+            color: var(--text-gray-700) !important;
+        }
+
+        .text-gray-600 {
+            color: var(--text-gray-600) !important;
+        }
+
+        .text-gray-500 {
+            color: var(--text-gray-500) !important;
+        }
+
+        .text-gray-200 {
+            color: var(--text-gray-200) !important;
+        }
+
+        /* Used for "分析中，请稍候..." */
+        .text-red-400 {
+            color: var(--text-red-400) !important;
+        }
+
+        /* Used for error messages */
 
         #theme-toggle .text-gray-700 {
             color: var(--theme-toggle-icon-color);
         }
 
-        input[type="file"], input[type="text"], textarea {
+        input[type="file"],
+        input[type="text"],
+        textarea {
             border-color: var(--border-gray-300);
-            color: var(--text-primary); /* Ensure input text color changes */
-            background-color: var(--card-bg); /* Input background should follow card bg */
+            color: var(--text-primary);
+            /* Ensure input text color changes */
+            background-color: var(--card-bg);
+            /* Input background should follow card bg */
             transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;
         }
-        input[type="file"]::placeholder, input[type="text"]::placeholder, textarea::placeholder { /* Adjust placeholder color */
+
+        input[type="file"]::placeholder,
+        input[type="text"]::placeholder,
+        textarea::placeholder {
+            /* Adjust placeholder color */
             color: var(--placeholder-text-color);
         }
-        input[type="file"]:focus, input[type="text"]:focus, textarea:focus {
-            outline: none; /* Remove default focus outline */
-            border-color: var(--focus-ring-green-500); /* Apply border color */
-            box-shadow: 0 0 0 2px var(--focus-ring-green-500); /* Apply custom focus ring */
+
+        input[type="file"]:focus,
+        input[type="text"]:focus,
+        textarea:focus {
+            outline: none;
+            /* Remove default focus outline */
+            border-color: var(--focus-ring-green-500);
+            /* Apply border color */
+            box-shadow: 0 0 0 2px var(--focus-ring-green-500);
+            /* Apply custom focus ring */
         }
 
-        .bg-red-50 { background-color: var(--bg-red-50); transition: background-color 0.3s ease; }
-        .text-red-700 { color: var(--text-red-700); transition: color 0.3s ease; }
-        .bg-red-100 { background-color: var(--bg-red-100); transition: background-color 0.3s ease; }
-        .text-red-800 { color: var(--text-red-800); transition: color 0.3s ease; }
+        .bg-red-50 {
+            background-color: var(--bg-red-50);
+            transition: background-color 0.3s ease;
+        }
 
-        .bg-yellow-50 { background-color: var(--bg-yellow-50); transition: background-color 0.3s ease; }
-        .text-yellow-700 { color: var(--text-yellow-700); transition: color 0.3s ease; }
-        .bg-yellow-100 { background-color: var(--bg-yellow-100); transition: background-color 0.3s ease; }
-        .text-yellow-800 { color: var(--text-yellow-800); transition: color 0.3s ease; }
+        .text-red-700 {
+            color: var(--text-red-700);
+            transition: color 0.3s ease;
+        }
 
-        .bg-blue-50 { background-color: var(--bg-blue-50); transition: background-color 0.3s ease; }
-        .text-blue-700 { color: var(--text-blue-700); transition: color 0.3s ease; }
-        .bg-blue-100 { background-color: var(--bg-blue-100); transition: background-color 0.3s ease; }
-        .text-blue-800 { color: var(--text-blue-800); transition: color 0.3s ease; }
+        .bg-red-100 {
+            background-color: var(--bg-red-100);
+            transition: background-color 0.3s ease;
+        }
+
+        .text-red-800 {
+            color: var(--text-red-800);
+            transition: color 0.3s ease;
+        }
+
+        .bg-yellow-50 {
+            background-color: var(--bg-yellow-50);
+            transition: background-color 0.3s ease;
+        }
+
+        .text-yellow-700 {
+            color: var(--text-yellow-700);
+            transition: color 0.3s ease;
+        }
+
+        .bg-yellow-100 {
+            background-color: var(--bg-yellow-100);
+            transition: background-color 0.3s ease;
+        }
+
+        .text-yellow-800 {
+            color: var(--text-yellow-800);
+            transition: color 0.3s ease;
+        }
+
+        .bg-blue-50 {
+            background-color: var(--bg-blue-50);
+            transition: background-color 0.3s ease;
+        }
+
+        .text-blue-700 {
+            color: var(--text-blue-700);
+            transition: color 0.3s ease;
+        }
+
+        .bg-blue-100 {
+            background-color: var(--bg-blue-100);
+            transition: background-color 0.3s ease;
+        }
+
+        .text-blue-800 {
+            color: var(--text-blue-800);
+            transition: color 0.3s ease;
+        }
 
         footer {
             background-color: var(--footer-bg);
             color: var(--footer-text);
             transition: background-color 0.3s ease, color 0.3s ease;
         }
+
         footer a {
             color: var(--footer-link);
             transition: color 0.3s ease;
         }
+
         footer a:hover {
             color: var(--footer-link-hover);
         }
@@ -331,16 +506,19 @@
             width: 90%;
             color: var(--text-primary);
         }
+
         .warning-popup h3 {
             font-size: 1.5rem;
             font-weight: bold;
             color: var(--text-red-700);
             margin-bottom: 1rem;
         }
+
         .warning-popup p {
             margin-bottom: 1rem;
             color: var(--text-gray-700);
         }
+
         .warning-popup button {
             background-color: var(--btn-bg-color);
             color: var(--btn-text-color);
@@ -348,11 +526,107 @@
             border-radius: 8px;
             transition: background-color 0.3s ease;
         }
+
         .warning-popup button:hover {
             background-color: var(--btn-hover-bg-color);
         }
+
+        /* **步骤 2: 为 Markdown 渲染结果添加样式** */
+        .gemini-content h1,
+        .gemini-content h2,
+        .gemini-content h3 {
+            font-weight: bold;
+            color: var(--text-gray-800);
+            margin-top: 1.5rem;
+            margin-bottom: 0.75rem;
+            padding-bottom: 0.25rem;
+            border-bottom: 1px solid var(--border-gray-300);
+        }
+
+        .gemini-content h1 {
+            font-size: 1.5em;
+        }
+
+        .gemini-content h2 {
+            font-size: 1.25em;
+        }
+
+        .gemini-content h3 {
+            font-size: 1.1em;
+        }
+
+        .gemini-content p {
+            line-height: 1.6;
+            margin-bottom: 1rem;
+            color: var(--text-gray-700);
+        }
+
+        .gemini-content ul,
+        .gemini-content ol {
+            margin-left: 1.5rem;
+            margin-bottom: 1rem;
+            color: var(--text-gray-700);
+        }
+
+        .gemini-content ul {
+            list-style-type: disc;
+        }
+
+        .gemini-content ol {
+            list-style-type: decimal;
+        }
+
+        .gemini-content li {
+            margin-bottom: 0.5rem;
+        }
+
+        .gemini-content code {
+            font-family: 'Courier New', Courier, monospace;
+            background-color: var(--highlight-bg);
+            color: var(--amethyst-color);
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
+            font-size: 0.9em;
+        }
+
+        .gemini-content pre {
+            background-color: rgba(0, 0, 0, 0.1);
+            padding: 1rem;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin-bottom: 1rem;
+            border: 1px solid var(--border-gray-300);
+        }
+
+        .dark-mode .gemini-content pre {
+            background-color: rgba(255, 255, 255, 0.05);
+        }
+
+        .gemini-content pre code {
+            background-color: transparent;
+            color: inherit;
+            padding: 0;
+            border-radius: 0;
+            font-size: inherit;
+        }
+
+        .gemini-content strong,
+        .gemini-content b {
+            font-weight: bold;
+            color: var(--text-gray-800);
+        }
+
+        .gemini-content a {
+            color: var(--footer-link);
+            text-decoration: underline;
+        }
+
+        .gemini-content a:hover {
+            color: var(--footer-link-hover);
+        }
     </style>
 </head>
+
 <body class="min-h-screen relative overflow-x-hidden">
     <div class="mc-bg-blur"></div>
     <div class="blob top-0 left-0"></div>
@@ -367,10 +641,12 @@
                 <h1 class="text-xl font-bold text-gray-800">Minecraft-ios日志分析器</h1>
             </div>
             <div class="flex items-center">
-                <button id="theme-toggle" class="p-2 rounded-full focus:outline-none focus:ring-2 focus:ring-green-500 mr-4">
+                <button id="theme-toggle"
+                    class="p-2 rounded-full focus:outline-none focus:ring-2 focus:ring-green-500 mr-4">
                     <i class="fas fa-moon text-gray-700 text-xl"></i>
                 </button>
-                <a href="https://lanrhyme.great-site.net" class="amethyst-dark text-white px-6 py-3 rounded-lg font-medium hover:bg-green-800 transition-colors">
+                <a href="https://lanrhyme.great-site.net"
+                    class="amethyst-dark text-white px-6 py-3 rounded-lg font-medium hover:bg-green-800 transition-colors">
                     <i class="fas fa-arrow-left mr-2 text-green-600"></i>返回LanRhyme的个人网站
                 </a>
             </div>
@@ -383,12 +659,16 @@
             <p class="text-xl md:text-2xl mb-8 text-gray-700">Amethyst(Pojav)-IOS专用，其他启动器可能也可以？</p>
             <div class="max-w-3xl mx-auto glassmorphism p-6">
                 <div class="flex flex-col md:flex-row gap-4">
-                    <input id="logFile" type="file" class="flex-grow p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500" accept=".log,.txt">
-                    <button id="uploadBtn" class="amethyst-dark text-white px-6 py-3 rounded-lg font-medium hover:bg-green-800 transition-colors">
+                    <input id="logFile" type="file"
+                        class="flex-grow p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+                        accept=".log,.txt">
+                    <button id="uploadBtn"
+                        class="amethyst-dark text-white px-6 py-3 rounded-lg font-medium hover:bg-green-800 transition-colors">
                         <i class="fas fa-upload mr-2 text-green-600"></i>上传日志文件
                     </button>
                 </div>
-                <p class="text-sm text-gray-600 mt-2">支持.log和.txt格式的Minecraft日志文件，请确保文件大小小于8M，若依旧无法解决请把此界面截图和日志文件发送给他人</p>
+                <p class="text-sm text-gray-600 mt-2">支持.log和.txt格式的Minecraft日志文件，请确保文件大小小于8M，若依旧无法解决请把此界面截图和日志文件发送给他人
+                </p>
             </div>
             <div id="analysisResult" class="mt-6"></div>
         </div>
@@ -415,9 +695,24 @@
                     <div class="mb-6">
                         <h4 class="font-medium text-gray-700 mb-3">常见错误</h4>
                         <div class="space-y-3">
-                            <div class="bg-red-50 p-3 rounded-lg"><div class="flex justify-between items-center"><span class="font-medium text-red-700">sodium!!!</span><span class="text-sm bg-red-100 text-red-800 px-2 py-1 rounded">32次</span></div><p class="text-sm text-gray-600 mt-1">别jb用优化模组了</p></div>
-                            <div class="bg-yellow-50 p-3 rounded-lg"><div class="flex justify-between items-center"><span class="font-medium text-yellow-700">网络问题</span><span class="text-sm bg-yellow-100 text-yellow-800 px-2 py-1 rounded">18次</span></div><p class="text-sm text-gray-600 mt-1">梯子是个好东西</p></div>
-                            <div class="bg-blue-50 p-3 rounded-lg"><div class="flex justify-between items-center"><span class="font-medium text-blue-700">渲染器崩溃</span><span class="text-sm bg-blue-100 text-blue-800 px-2 py-1 rounded">12次</span></div><p class="text-sm text-gray-600 mt-1">自动！自动！自动！</p></div>
+                            <div class="bg-red-50 p-3 rounded-lg">
+                                <div class="flex justify-between items-center"><span
+                                        class="font-medium text-red-700">sodium!!!</span><span
+                                        class="text-sm bg-red-100 text-red-800 px-2 py-1 rounded">32次</span></div>
+                                <p class="text-sm text-gray-600 mt-1">别jb用优化模组了</p>
+                            </div>
+                            <div class="bg-yellow-50 p-3 rounded-lg">
+                                <div class="flex justify-between items-center"><span
+                                        class="font-medium text-yellow-700">网络问题</span><span
+                                        class="text-sm bg-yellow-100 text-yellow-800 px-2 py-1 rounded">18次</span></div>
+                                <p class="text-sm text-gray-600 mt-1">梯子是个好东西</p>
+                            </div>
+                            <div class="bg-blue-50 p-3 rounded-lg">
+                                <div class="flex justify-between items-center"><span
+                                        class="font-medium text-blue-700">渲染器崩溃</span><span
+                                        class="text-sm bg-blue-100 text-blue-800 px-2 py-1 rounded">12次</span></div>
+                                <p class="text-sm text-gray-600 mt-1">自动！自动！自动！</p>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -442,27 +737,43 @@
     <footer class="bg-white text-gray-700 py-8 mt-12">
         <div class="container mx-auto px-4">
             <div class="flex flex-col md:flex-row justify-between items-center">
-                <div class="mb-4 md:mb-0"><div class="flex items-center"><div class="w-8 h-8 amethyst-bg flex items-center justify-center text-white mr-2 rounded"><i class="fas fa-file-alt text-green-600"></i></div><span class="font-bold">LanRhyme的日志分析器</span></div><p class="text-sm text-gray-500 mt-2">by LanRhyme</p></div>
-                <div class="text-sm text-gray-500"><p>from <a href="https://lanrhyme.great-site.net" class="text-green-600 hover:text-green-800">https://lanrhyme.great-site.net</a></p><p>©2025</p></div>
+                <div class="mb-4 md:mb-0">
+                    <div class="flex items-center">
+                        <div class="w-8 h-8 amethyst-bg flex items-center justify-center text-white mr-2 rounded"><i
+                                class="fas fa-file-alt text-green-600"></i></div><span
+                            class="font-bold">LanRhyme的日志分析器</span>
+                    </div>
+                    <p class="text-sm text-gray-500 mt-2">by LanRhyme</p>
+                </div>
+                <div class="text-sm text-gray-500">
+                    <p>from <a href="https://lanrhyme.great-site.net"
+                            class="text-green-600 hover:text-green-800">https://lanrhyme.great-site.net</a></p>
+                    <p>©2025</p>
+                </div>
             </div>
         </div>
     </footer>
 
     <div id="custom-menu">
         <div class="menu-header">常规操作</div>
-        <div class="menu-item" id="back-item" onclick="backAction()"><i class="fa fa-arrow-left"></i><span>返回</span></div>
-        <div class="menu-item" id="refresh-item" onclick="refreshAction()"><i class="fa fa-refresh"></i><span>刷新</span></div>
+        <div class="menu-item" id="back-item" onclick="backAction()"><i class="fa fa-arrow-left"></i><span>返回</span>
+        </div>
+        <div class="menu-item" id="refresh-item" onclick="refreshAction()"><i class="fa fa-refresh"></i><span>刷新</span>
+        </div>
         <div class="menu-divider"></div>
         <div class="menu-header">编辑操作</div>
         <div class="menu-item" id="copy-item" onclick="copyAction()"><i class="fa fa-copy"></i><span>复制</span></div>
         <div class="menu-item" id="paste-item" onclick="pasteAction()"><i class="fa fa-paste"></i><span>粘贴</span></div>
         <div class="menu-divider"></div>
         <div class="menu-header">链接操作</div>
-        <div class="menu-item" id="open-in-new-tab-item" onclick="openInNewTabAction()"><i class="fa fa-external-link"></i><span>在新标签页打开</span></div>
-        <div class="menu-item" id="copy-link-item" onclick="copyLinkAction()"><i class="fa fa-link"></i><span>复制链接地址</span></div>
+        <div class="menu-item" id="open-in-new-tab-item" onclick="openInNewTabAction()"><i
+                class="fa fa-external-link"></i><span>在新标签页打开</span></div>
+        <div class="menu-item" id="copy-link-item" onclick="copyLinkAction()"><i
+                class="fa fa-link"></i><span>复制链接地址</span></div>
         <div class="menu-divider"></div>
         <div class="menu-header">其他操作</div>
-        <div class="menu-item" id="back-to-home-item" onclick="backToHomeAction()"><i class="fa fa-home"></i><span>返回主页</span></div>
+        <div class="menu-item" id="back-to-home-item" onclick="backToHomeAction()"><i
+                class="fa fa-home"></i><span>返回主页</span></div>
     </div>
 
     <div id="warningPopup" class="warning-popup hidden">
@@ -522,7 +833,7 @@
         function refreshAction() { location.reload(); hideMenu(); }
         function copyAction() { if (selectedText) { if (navigator.clipboard) { navigator.clipboard.writeText(selectedText).catch((err) => { fallbackCopyText(selectedText); }); } else { fallbackCopyText(selectedText); } } hideMenu(); }
         function fallbackCopyText(text) { const textarea = document.createElement('textarea'); textarea.value = text; textarea.style.position = 'fixed'; textarea.style.opacity = '0'; document.body.appendChild(textarea); textarea.select(); document.execCommand('copy'); document.body.removeChild(textarea); }
-        function pasteAction() { const targetElement = focusedElementBeforeMenu; if (targetElement && (targetElement.tagName === 'INPUT' || targetElement.tagName === 'TEXTAREA' || targetElement.isContentEditable)) { if (navigator.clipboard) { navigator.clipboard.readText().then((clipboardText) => { if (typeof targetElement.execCommand === 'function') { document.execCommand('insertText', false, clipboardText); } }).catch((err) => {}); } } hideMenu(); }
+        function pasteAction() { const targetElement = focusedElementBeforeMenu; if (targetElement && (targetElement.tagName === 'INPUT' || targetElement.tagName === 'TEXTAREA' || targetElement.isContentEditable)) { if (navigator.clipboard) { navigator.clipboard.readText().then((clipboardText) => { if (typeof targetElement.execCommand === 'function') { document.execCommand('insertText', false, clipboardText); } }).catch((err) => { }); } } hideMenu(); }
         function openInNewTabAction() { if (currentTarget) { window.open(currentTarget.href, '_blank'); } hideMenu(); }
         function copyLinkAction() { if (currentTarget) { if (navigator.clipboard) { navigator.clipboard.writeText(currentTarget.href).catch((err) => { fallbackCopyText(currentTarget.href); }); } else { fallbackCopyText(currentTarget.href); } } hideMenu(); }
         function backToHomeAction() { window.location.href = '/'; hideMenu(); }
@@ -559,7 +870,7 @@
             }
         }
 
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             loadTheme(); // Load theme when DOM is ready
 
             // Initialize Chart.js charts
@@ -643,7 +954,7 @@
         });
 
 
-        document.addEventListener("DOMContentLoaded", function() {
+        document.addEventListener("DOMContentLoaded", function () {
             const cards = document.querySelectorAll(".anim-card");
             function checkVisibility() { cards.forEach(card => { const rect = card.getBoundingClientRect(); const isVisible = rect.top < (window.innerHeight || document.documentElement.clientHeight) && rect.bottom >= 0; if (isVisible && !card.classList.contains('active')) { card.classList.add('active'); } }); }
             checkVisibility();
@@ -718,9 +1029,9 @@
 
                 // 3. Display Gemini analysis card placeholder
                 resultDiv.innerHTML += `<div id="geminiCard" class="result-card anim-card">
-                    <div class="text-lg font-bold text-gray-800">AI 分析结果(Gemini  2.5 Flash)</div>
+                    <div class="text-lg font-bold text-gray-800">AI 分析结果(Gemini 2.5 Flash)</div>
                     <hr class="my-3 border-gray-600/10">
-                    <div class="gemini-content text-left text-gray-700" style="white-space: pre-wrap; word-wrap: break-word;">分析中，请稍候...</div>
+                    <div class="gemini-content text-left" style="word-wrap: break-word;">分析中，请稍候...</div>
                 </div>`;
 
                 setTimeout(() => { document.querySelector('#geminiCard').classList.add('active'); }, 250);
@@ -731,30 +1042,36 @@
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ log: data1.log }) // Rely on server's .env for proxy/API key
                 })
-                .then(res2 => res2.json())
-                .then(data2 => {
-                    const aiDiv = document.querySelector('#geminiCard .gemini-content');
-                    aiDiv.innerText = data2.gemini; // innerText handles newlines correctly
+                    .then(res2 => res2.json())
+                    .then(data2 => {
+                        const aiDiv = document.querySelector('#geminiCard .gemini-content');
+                        // **步骤 3: 使用 marked.js 解析并渲染 Markdown**
+                        if (data2.gemini) {
+                            aiDiv.innerHTML = marked.parse(data2.gemini);
+                        } else {
+                            aiDiv.innerText = 'AI未返回有效分析结果。';
+                        }
 
-                    // 5. Add copy button
-                    let copyBtn = document.createElement('button');
-                    copyBtn.innerText = '复制分析内容';
-                    copyBtn.className = 'mt-4 px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 transition-colors copy-btn';
-                    copyBtn.onclick = function() {
-                        const baseCardList = resultDiv.querySelectorAll('.result-card:not(#geminiCard) ul li');
-                        const baseCardText = Array.from(baseCardList).map(li => li.innerText).join('\n');
-                        const aiCardText = resultDiv.querySelector('#geminiCard .gemini-content').innerText;
-                        const text = `【基础信息】\n${baseCardText}\n\n【AI分析】\n${aiCardText}`;
-                        navigator.clipboard.writeText(text).then(() => {
-                            copyBtn.innerText = '已复制！';
-                            setTimeout(() => { copyBtn.innerText = '复制分析内容'; }, 1500);
-                        });
-                    };
-                    document.querySelector('#geminiCard').appendChild(copyBtn);
-                })
-                .catch(e => {
-                    document.querySelector('#geminiCard .gemini-content').innerText = 'AI分析失败：' + e.message;
-                });
+                        // 5. Add copy button
+                        let copyBtn = document.createElement('button');
+                        copyBtn.innerText = '复制分析内容';
+                        copyBtn.className = 'mt-4 px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 transition-colors copy-btn';
+                        copyBtn.onclick = function () {
+                            const baseCardList = resultDiv.querySelectorAll('.result-card:not(#geminiCard) ul li');
+                            const baseCardText = Array.from(baseCardList).map(li => li.innerText).join('\n');
+                            // Use innerText to get the plain text version of the rendered markdown for copying
+                            const aiCardText = resultDiv.querySelector('#geminiCard .gemini-content').innerText;
+                            const text = `【基础信息】\n${baseCardText}\n\n【AI分析】\n${aiCardText}`;
+                            navigator.clipboard.writeText(text).then(() => {
+                                copyBtn.innerText = '已复制！';
+                                setTimeout(() => { copyBtn.innerText = '复制分析内容'; }, 1500);
+                            });
+                        };
+                        document.querySelector('#geminiCard').appendChild(copyBtn);
+                    })
+                    .catch(e => {
+                        document.querySelector('#geminiCard .gemini-content').innerText = 'AI分析失败：' + e.message;
+                    });
 
             } catch (e) {
                 resultDiv.innerHTML = `<div class="text-red-400">分析失败：${e.message}</div>`;
@@ -762,4 +1079,5 @@
         };
     </script>
 </body>
+
 </html>

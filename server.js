@@ -47,7 +47,7 @@ function extractInfo(log) {
 
     const patterns = {
         device: /\[Pre-Init\] Device: (.*?)\n/,
-        os: /\[Pre-Init\] (iPadOS \d+\.\d+)/, // 提取 "iPadOS 18.5"
+        os: /\[Pre-Init\] (i(.*?)OS \d+\.\d+)/, // 提取 "iPadOS 18.5"
         launcher_version: /\[Pre-Init\] Version: (.*?)\n/,
         commit: /Commit: (.*?)\n/,
         java_version: /java-(\d+)-openjdk/, // 提取 Java 版本号，如 "21"

@@ -365,31 +365,7 @@
                 </div>
             </div>
 
-            <div id="upload-stats" class="solid-card anim-card w-full">
-                <h3 class="text-xl font-semibold mb-4 flex items-center">
-                    <span class="w-8 h-8 amethyst-bg rounded-full flex items-center justify-center text-white mr-3">
-                        <i class="fas fa-chart-bar"></i>
-                    </span>
-                    日志上传统计
-                </h3>
-                <div class="grid grid-cols-3 gap-2 text-center text-sm mb-4">
-                    <div>
-                        <p class="font-bold text-lg" id="total-uploads">0</p>
-                        <p class="opacity-75">总数</p>
-                    </div>
-                    <div>
-                        <p class="font-bold text-lg" id="weekly-uploads">0</p>
-                        <p class="opacity-75">本周</p>
-                    </div>
-                    <div>
-                        <p class="font-bold text-lg" id="daily-uploads">0</p>
-                        <p class="opacity-75">今日</p>
-                    </div>
-                </div>
-                <div class="chart-container" style="height: 180px;">
-                    <canvas id="uploadChart"></canvas>
-                </div>
-            </div>
+
         </section>
     </main>
 
@@ -538,58 +514,11 @@
     document.addEventListener('DOMContentLoaded', function () {
         loadTheme();
 
-        const uploadCtx = document.getElementById('uploadChart').getContext('2d');
-        uploadChartInstance = new Chart(uploadCtx, { // Assign the new Chart instance to the variable
-            type: 'line', // Changed to line chart
-            data: {
-                labels: ['周一', '周二', '周三', '周四', '周五', '周六', '周日'],
-                datasets: [{
-                    label: '上传日志数量',
-                    data: [15, 18, 22, 20, 25, 30, 28], // Example data, replace with real data from backend
-                    backgroundColor: 'rgba(40, 167, 69, 0.3)', // Light background for line chart area
-                    borderColor: 'var(--amethyst-color)', // Line color
-                    borderWidth: 2,
-                    fill: true, // Fill the area under the line
-                    tension: 0.3 // Smooth the line
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: {
-                        display: false // Hide legend for cleaner look
-                    }
-                },
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        grid: {
-                            color: 'var(--card-border)' // Use card border color for grid
-                        },
-                        ticks: {
-                            color: 'var(--text-primary)' // Use primary text color for ticks
-                        }
-                    },
-                    x: {
-                        grid: {
-                            display: false
-                        },
-                        ticks: {
-                            color: 'var(--text-primary)' // Use primary text color for ticks
-                        }
-                    }
-                }
-            }
-        });
-        updateChartColors(); // Initial call
+
         fetchGitHubInfo();
         checkAiStatus();
 
-        // Dummy data for upload stats - replace with actual backend data
-        document.getElementById('total-uploads').innerText = '250'; // Example total
-        document.getElementById('weekly-uploads').innerText = '120'; // Example weekly
-        document.getElementById('daily-uploads').innerText = '25';  // Example daily
+
     });
 
     // 卡片入场动画

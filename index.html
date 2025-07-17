@@ -114,9 +114,18 @@
             min-height: 100vh;
         }
 
+        /* MODIFIED: Adopted .page-content styles from index1.html for consistent main content area */
         .page-content {
             flex-grow: 1;
             width: 100%;
+            display: flex; /* Added from index1.html */
+            flex-direction: column; /* Changed for vertical stacking of sections */
+            align-items: center; /* For centering the overall sections */
+            padding: 2rem; /* Added from index1.html */
+            box-sizing: border-box; /* Added from index1.html */
+            max-width: 1200px; /* Added from index1.html */
+            margin: 0 auto; /* Added from index1.html */
+            /* Removed flex-wrap here, as sections should stack vertically */
         }
 
         .mc-bg-container {
@@ -140,6 +149,12 @@
             box-shadow: var(--card-shadow);
             transition: all 0.3s ease;
             padding: 1.5rem;
+        }
+
+        /* ADDED: Hover effect for solid-card */
+        .solid-card:hover {
+            transform: scale(1.02);
+            box-shadow: var(--card-shadow-hover); /* Optional: add a hover shadow variable if needed */
         }
 
         .header-card {
@@ -183,15 +198,35 @@
             100% { transform: translate(0, 0) scale(1); }
         }
 
+        /* MODIFIED: Adjusted anim-card transition to match index1.html's anim-fade-in-up */
         .anim-card {
             opacity: 0;
             transform: translateY(30px);
-            transition: all 0.8s cubic-bezier(0.2, 0.8, 0.2, 1);
+            transition: opacity 0.7s ease-out, transform 0.7s ease-out;
         }
 
         .anim-card.active {
             opacity: 1;
             transform: translateY(0);
+        }
+
+        /* ADDED: Pinned card animation (from index1.html) */
+        .card-bounce {
+            animation: cardBounce 0.3s ease-out;
+        }
+
+        @keyframes cardBounce {
+            0% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(0.95);
+            }
+
+            100% {
+                transform: scale(1);
+            }
         }
 
         input[type="file"],
@@ -224,6 +259,31 @@
         footer a { color: var(--footer-link); transition: color 0.3s ease; }
         footer a:hover { color: var(--footer-link-hover); text-decoration: underline; }
 
+        /* MODIFIED: Updated #theme-toggle to match index1.html's styling */
+        #theme-toggle {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-left: 20px; /* Added for consistent spacing */
+            border-radius: 50%;
+            background-color: var(--card-bg); /* Added from index1.html */
+            border: 1px solid var(--card-border); /* Added from index1.html */
+        }
+
+        #theme-toggle:hover {
+            transform: scale(1.1); /* Added from index1.html */
+        }
+
+        /* NEW: Styles for icons that should change color with theme */
+        .theme-icon-color {
+            color: var(--theme-toggle-icon-color);
+            transition: color 0.3s ease;
+        }
+
         #custom-menu {
             display: none; position: fixed; background: var(--menu-bg);
             backdrop-filter: blur(10px); border-radius: 15px;
@@ -245,7 +305,6 @@
         .bg-yellow-100 { background-color: var(--bg-yellow-100); } .text-yellow-800 { color: var(--text-yellow-800); }
         .bg-blue-50 { background-color: var(--bg-blue-50); } .text-blue-700 { color: var(--text-blue-700); }
         .bg-blue-100 { background-color: var(--bg-blue-100); } .text-blue-800 { color: var(--text-blue-800); }
-        #theme-toggle i { color: var(--theme-toggle-icon-color); }
 
         #analysisResult .result-card {
             background-color: var(--card-bg);
@@ -303,13 +362,13 @@
     <header class="w-full py-4 px-6 flex justify-center items-center sticky top-4 z-20">
         <div class="container mx-auto header-card p-2 flex items-center justify-between">
             <div class="flex items-center">
-                <div class="w-10 h-10 amethyst-bg flex items-center justify-center text-white ml-3 mr-3 rounded-full">
-                    <i class="fas fa-file-alt"></i>
+                <div class="w-10 h-10 flex items-center justify-center ml-3 mr-3 rounded-full">
+                    <i class="fas fa-file-alt theme-icon-color text-xl"></i>
                 </div>
-                <h1 class="text-xl md:text-2xl font-bold">Minecraft-ios日志分析器</h1>
+                <h1 class="text-xl md:text-2xl font-bold">Minecraft-Mobile日志分析器</h1>
             </div>
             <div class="flex items-center space-x-4 mr-3">
-                <button id="theme-toggle" class="p-2 rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-800 focus:ring-white">
+                <button id="theme-toggle">
                     <i class="fas fa-moon text-xl"></i>
                 </button>
                 <a href="https://lanrhyme.netlify.app/" class="amethyst-dark-button hidden md:flex items-center">
@@ -319,28 +378,28 @@
         </div>
     </header>
 
-    <main class="page-content container mx-auto py-12 px-4">
-        <section class="text-center mb-12 w-full">
-            <h1 class="text-4xl md:text-5xl font-bold mb-4">Minecraft日志分析器</h1>
-            <p class="text-xl md:text-2xl mb-8 opacity-80">Amethyst(Pojav)-IOS专用，其他启动器可能也可以？</p>
-            <div class="max-w-3xl mx-auto solid-card">
-                <div class="flex flex-col md:flex-row gap-4">
-                    <input id="logFile" type="file" class="flex-grow p-3 rounded-lg" accept=".log,.txt">
-                    <button id="uploadBtn" class="amethyst-dark-button flex justify-center items-center">
-                        <i class="fas fa-upload mr-2"></i>上传日志文件
-                    </button>
-                </div>
-                <p class="text-sm mt-3" style="color: var(--footer-text);">支持.log和.txt格式的日志文件，请确保文件大小小于8M</p>
+    <main class="page-content"> <section class="text-center mb-12 w-full">
+        <h1 class="text-4xl md:text-5xl font-bold mb-4">Minecraft-Mobile日志分析器</h1>
+        <p class="text-xl md:text-2xl mb-8 opacity-80">适用于安卓和iOS设备的Minecraft日志分析器工具</p>
+        <div class="solid-card w-full max-w-6xl mx-auto hover:scale-105">
+            <div class="flex flex-col md:flex-row gap-4">
+                <input id="logFile" type="file" class="flex-grow p-3 rounded-lg" accept=".log,.txt">
+                <button id="uploadBtn" class="amethyst-dark-button flex justify-center items-center">
+                    <i class="fas fa-upload mr-2"></i>上传日志文件
+                </button>
             </div>
-            <div id="analysisResult" class="mt-8 text-left max-w-3xl mx-auto"></div>
-        </section>
+            <p class="text-sm mt-3" style="color: var(--footer-text);">支持.log和.txt格式的日志文件，请确保文件大小小于8M</p>
+            <p class="text-sm mt-3" style="color: var(--footer-text);">支持Amethyst(pojav)_iOS、Zalith Launcher、Fold Craft Launcher</p>
+        </div>
+        <div id="analysisResult" class="mt-8 text-left max-w-6xl mx-auto"></div>
+    </section>
 
         <section class="flex flex-col gap-8 w-full max-w-6xl mx-auto">
             <div class="grid-compact">
-                <a href="https://github.com/LanRhyme/Web-MinecraftLogAnalyzer" target="_blank" rel="noopener noreferrer" id="github-info" class="solid-card anim-card block cursor-pointer">
+                <a href="https://github.com/LanRhyme/Web-MinecraftLogAnalyzer" target="_blank" rel="noopener noreferrer" id="github-info" class="solid-card anim-card block cursor-pointer hover:scale-105">
                     <h3 class="text-lg font-semibold mb-2 flex items-center">
-                        <span class="w-7 h-7 amethyst-bg rounded-full flex items-center justify-center text-white mr-2 text-sm">
-                            <i class="fab fa-github"></i>
+                        <span class="w-7 h-7 rounded-full flex items-center justify-center mr-2 text-sm">
+                            <i class="fab fa-github theme-icon-color"></i>
                         </span>
                         GitHub 项目信息
                     </h3>
@@ -351,10 +410,10 @@
                     </div>
                 </a>
 
-                <div id="ai-status" class="solid-card anim-card">
+                <div id="ai-status" class="solid-card anim-card hover:scale-105">
                     <h3 class="text-lg font-semibold mb-2 flex items-center">
-                        <span class="w-7 h-7 amethyst-bg rounded-full flex items-center justify-center text-white mr-2 text-sm">
-                            <i class="fas fa-robot"></i>
+                        <span class="w-7 h-7 rounded-full flex items-center justify-center mr-2 text-sm">
+                            <i class="fas fa-star theme-icon-color"></i>
                         </span>
                         AI 服务状态
                     </h3>
@@ -364,8 +423,6 @@
                     </div>
                 </div>
             </div>
-
-
         </section>
     </main>
 
@@ -374,14 +431,13 @@
             <div class="flex flex-col md:flex-row justify-between items-center">
                 <div class="mb-4 md:mb-0 text-center md:text-left">
                     <div class="flex items-center justify-center md:justify-start">
-                        <div class="w-8 h-8 amethyst-bg flex items-center justify-center text-white mr-2 rounded"><i class="fas fa-file-alt"></i></div>
-                        <span class="font-bold">LanRhyme的日志分析器</span>
+                        <div class="w-8 h-8 flex items-center justify-center mr-2 rounded"><i class="fas fa-file-alt theme-icon-color"></i></div>
+                        <span class="font-bold">Minecraft-Mobile日志分析器</span>
                     </div>
-                    <p class="text-sm mt-2">by LanRhyme</p>
+                    <p class="text-sm mt-2">© 2025 LanRhyme. All rights reserved. | Built with ❤️ and Code.</p>
                 </div>
                 <div class="text-sm text-center md:text-right">
-                    <p>from <a href="https://lanrhyme.great-site.net">https://lanrhyme.great-site.net</a></p>
-                    <p>©2025</p>
+                    <p> <a href="https://lanrhyme.great-site.net">https://lanrhyme.great-site.net</a></p>
                 </div>
             </div>
         </div>
@@ -467,7 +523,7 @@
     async function pasteAction() { if (focusedElementBeforeMenu) { try { const text = await navigator.clipboard.readText(); focusedElementBeforeMenu.focus(); document.execCommand('insertText', false, text); } catch (err) { } } hideMenu(); }
     function openInNewTabAction() { if (currentTarget) window.open(currentTarget.href, '_blank'); hideMenu(); }
     function copyLinkAction() { if (currentTarget) navigator.clipboard.writeText(currentTarget.href); hideMenu(); }
-    function backToHomeAction() { window.location.href = '/'; hideMenu(); }
+    function backToHomeAction() { window.location.href = 'https://lanrhyme.netlify.app/'; hideMenu(); } // Corrected URL
 
     // 主题切换
     const themeToggleBtn = document.getElementById('theme-toggle');
@@ -588,7 +644,7 @@
             const data1 = await res1.json();
             if (data1.error) { resultDiv.innerHTML = `<div class="solid-card text-red-700 p-4">${data1.error}</div>`; return; }
             if (data1.info.keyword) { showWarningPopup(data1.info.keyword, "由开发者添加，这可能是导致游戏崩溃的主要原因，一般来说是模组文件，请检查你的mod列表"); }
-            const infoDisplayMap = { device: '设备', os: '操作系统', launcher_version: '启动器版本', commit: '提交版本号', java_version: 'Java 版本', renderer: '渲染器', minecraft_version: '游戏版本', keyword: '可能导致崩溃的关键词' };
+            const infoDisplayMap = { launcher_name: '启动器', device: '设备', os: '操作系统', launcher_version: '启动器版本', commit: '提交版本号', java_version: 'Java 版本', renderer: '渲染器', minecraft_version: '游戏版本', keyword: '可能导致崩溃的关键词' };
             let infoHtml = `<div class="result-card anim-card">
                     <h3 class="text-lg font-bold">基础信息提取</h3><hr class="my-3" style="border-color: var(--card-border);">
                     <ul class="list-disc list-inside text-left space-y-1">`;
@@ -597,7 +653,7 @@
 
             // Add Quick Analysis Card here
             infoHtml += `<div id="quickAnalysisCard" class="result-card anim-card mt-6">
-                <h3 class="text-lg font-bold">快速分析结果</h3><hr class="my-3" style="border-color: var(--card-border);">
+                <h3 class="text-lg font-bold">快速分析结果(来自PCL2数据)</h3><hr class="my-3" style="border-color: var(--card-border);">
                 <div class="quick-analysis-content text-left" style="word-wrap: break-word;">${marked.parse(data1.quickAnalysis)}</div>
             </div>`;
 

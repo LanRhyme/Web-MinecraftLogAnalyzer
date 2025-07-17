@@ -46,25 +46,97 @@ async function callGemini(log, proxyTarget) {
 function extractInfo(log) {
     const info = {};
     const patterns = {
-        device: /\[Pre-Init\] Device: (.*?)\n/,
-        os: /\[Pre-Init\] (i(.*?)OS \d+\.\d+)/,
-        launcher_version: /\[Pre-Init\] Version: (.*?)\n/,
-        commit: /Commit: (.*?)\n/,
-        java_version: /java-(\d+)-openjdk/,
-        renderer: /RENDERER is set to (.*?)\n/,
-        minecraft_version: /Launching Minecraft .*?-([0-9]+\.[0-9]+(?:\.[0-9]+)?(?:-rc[0-9]+)?)\n/,
-        keyword_regex: /\[(.*?)\] Failed to load/
+        // New section for explicit launcher identification
+        launcher_name: [
+            { regex: /\[Pre-Init\] (PojavLauncher INIT!|Amethyst INIT!)/, name: 'Amethyst_iOS' },
+            { regex: /Info: Launcher version:/, name: 'Zalith Launcher' },
+            { regex: /FCL Version:/, name: 'Fold Craft Launcher' }
+        ],
+        launcher_version: [
+            { regex: /\[Pre-Init\] Version: (.*?)\n/, key: 'Launcher Version' }, // Amethyst_iOS
+            { regex: /Info: Launcher version: (.*?) \(/, key: 'Launcher Version' }, // Zalith Launcher
+            { regex: /FCL Version: (.*?)\n/, key: 'Launcher Version' } // Fold Craft Launcher
+        ],
+        architecture: [
+            { regex: /Architecture: (.*?)($|\n)/, key: 'Architecture' } // General: Zalith, Fold Craft
+        ],
+        device: [
+            { regex: /\[Pre-Init\] Device: (.*?)\n/, key: 'Device' }, // Amethyst_iOS
+            { regex: /Info: Device model: (.*?)\n/, key: 'Device Model' }, // Zalith Launcher
+            { regex: /Device: (.*?)\n/, key: 'Device' } // Fold Craft Launcher
+        ],
+        os: [
+            { regex: /\[Pre-Init\] (iOS \d+\.\d+\.?\d*? \((.*?)\))\n/, key: 'OS Version' }, // Amethyst_iOS with build number
+            { regex: /\[Pre-Init\] (iOS \d+\.\d+)/, key: 'OS Version' }, // Amethyst_iOS
+            { regex: /Android SDK: (.*?)($|\n)/, key: 'Android SDK' } // Zalith, Fold Craft
+        ],
+        java_version: [
+            { regex: /Info: Java Runtime: (.*?)\n/, key: 'Java Runtime' }, // Zalith Launcher
+            { regex: /Java Version: (.*?)($|\n)/, key: 'Java Version' }, // Fold Craft Launcher
+            { regex: /java-(\d+)-openjdk/, key: 'Java Version' } // Existing, might catch some cases
+        ],
+        renderer: [
+            { regex: /Info: Renderer: (.*?)\n/, key: 'Renderer' }, // Zalith Launcher
+            { regex: /Renderer: (.*?)\n/, key: 'Renderer' } // Fold Craft Launcher
+        ],
+        minecraft_version: [
+            { regex: /Info: Selected Minecraft version: (.*?)\n/, key: 'Minecraft Version' }, // Zalith Launcher
+            { regex: /\[MCDL\] Downloading ([0-9]+\.[0-9]+(?:\.[0-9]+)?)\.json/, key: 'Minecraft Version' }, // Amethyst_iOS
+            { regex: /forge-([0-9]+\.[0-9]+(?:\.[0-9]+)?(?:-rc[0-9]+)?)-/, key: 'Minecraft Version' }, // Fold Craft (from mod list or args)
+            { regex: /fabric-loader-(\d+\.\d+\.\d+)-(\d+\.\d+\.\d+)/, key: 'Minecraft Version' }, // Amethyst/Fold Craft (from fabric loader)
+            { regex: /Launching Minecraft .*?-([0-9]+\.[0-9]+(?:\.[0-9]+)?(?:-rc[0-9]+)?)\n/, key: 'Minecraft Version' } // Existing, general
+        ],
+        commit: [
+            { regex: /Commit: (.*?)\n/, key: 'Commit' } // Amethyst_iOS
+        ],
+        cpu: [
+            { regex: /CPU: (.*?)\n/, key: 'CPU' } // Fold Craft Launcher
+        ],
+        language: [
+            { regex: /Language: (.*?)\n/, key: 'Language' } // Fold Craft Launcher
+        ],
+        api_version: [
+            { regex: /Info: API version: (.*?)\n/, key: 'API Version' } // Zalith Launcher
+        ],
+        fcl_version_code: [
+            { regex: /FCL Version Code: (.*?)\n/, key: 'FCL Version Code' } // Fold Craft Launcher
+        ]
     };
+
     const detectedKeywords = new Set();
-    for (const key in patterns) {
-        if (key === 'keyword_regex') {
-            const match = log.match(patterns[key]);
+
+    // First, try to identify the launcher and set info.launcher_name
+    for (const patternObj of patterns.launcher_name) {
+        if (log.match(patternObj.regex)) {
+            info.launcher_name = patternObj.name;
+            break; // Stop after the first match
+        }
+    }
+
+    for (const category in patterns) {
+        // Skip 'launcher_name' as it's handled above, and 'keyword_regex' as it's a special case
+        if (category === 'launcher_name') {
+            continue;
+        }
+
+        // Handle keyword_regex separately
+        if (category === 'keyword_regex') {
+            const match = log.match(/\[(.*?)\] Failed to load/);
             if (match && match[1] !== undefined) detectedKeywords.add(match[1].trim());
             continue;
         }
-        const match = log.match(patterns[key]);
-        if (match && match[1] !== undefined) info[key] = match[1].trim();
+
+        // Iterate through the array of regex patterns for each category
+        for (const patternObj of patterns[category]) {
+            const match = log.match(patternObj.regex);
+            if (match && match[1] !== undefined) {
+                // If a match is found, store it with the specified key and break to the next category
+                info[patternObj.key] = match[1].trim();
+                break;
+            }
+        }
     }
+
     const customKeywords = CUSTOM_KEYWORDS_ENV.split('|').map(k => k.trim()).filter(k => k.length > 0);
     for (const customKw of customKeywords) {
         if (log.includes(customKw)) detectedKeywords.add(customKw);
@@ -72,6 +144,7 @@ function extractInfo(log) {
     if (detectedKeywords.size > 0) info.keyword = Array.from(detectedKeywords).join(', ');
     return info;
 }
+
 
 /**
  * [V2-增强版] 快速分析函数

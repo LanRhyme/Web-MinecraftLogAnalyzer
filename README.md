@@ -1,119 +1,95 @@
-# Minecraft-IOS日志分析器
+# 🪓 Minecraft-Mobile 日志分析器
 
-![GitHub top language](https://github.com/LanRhyme/Web-MinecraftLogAnalyzer)
-![GitHub license](https://img.shields.io/badge/license-GPLv3-blue.svg)
+一个为 **Minecraft 安卓 / iOS 启动器日志**设计的智能分析工具，支持自动提取基础信息、快速匹配崩溃原因，并提供 AI 智能分析。🌟
 
-基于Web的Minecraft日志分析工具，提供日志上传、基础信息提取、错误统计和AI智能分析功能。特别针对Amethyst(Pojav) IOS启动器优化，其他启动器日志可能兼容。
+## 🖼️ 在线体验地址
 
-## 技术栈
-- 前端：HTML5/CSS3 + Tailwind CSS + Chart.js + Font Awesome
-- 后端：Node.js + Express + Multer + Axios
-- AI分析：Google Gemini API（需自行申请API密钥）
+👉 [https://mclog.xiaohe520.top/](https://mclog.xiaohe520.top/)
 
-## 功能特性
-1. **日志上传** 支持.log/.txt格式文件，最大8MB
-2. **基础解析** 自动提取：
-   - Launcher版本
-   - Java版本
-   - 渲染器类型
-   - 游戏版本
-   - 关键词检测（如sodium模组）
-3. **错误统计** 实时展示：
-   - 错误类型分布图
-   - 常见错误案例
-4. **智能分析** 通过Gemini API生成：
-   - 错误原因诊断
-   - 优化建议
-   - 解决方案参考
+---
 
-## 许可协议
-本项目采用GPLv3开源协议，完整协议文本可通过以下途径获取：
-- [GNU GPLv3官网](https://www.gnu.org/licenses/gpl-3.0.en.html)
-- [项目根目录LICENSE文件](./LICENSE)
+## 📦 功能特色
 
-**核心条款摘要**：
-1. 任何基于本项目的衍生作品必须保持GPLv3开源
-2. 必须保留原始版权声明和许可证信息
-3. 商业用途需遵守GPLv3协议条款
+- 📝 支持上传 `.log` 或 `.txt` 日志文件（≤8MB）
+- 📊 自动识别设备、系统、启动器、Minecraft 版本等关键信息
+- ⚠️ 检测崩溃关键词，识别潜在的 Mod 冲突或环境异常
+- ⚡ 内置快速分析模块（PCL2 同款规则）
+- 🤖 调用 Gemini 2.5 Flash 进行 AI 分析和建议
+- 🌙 支持深色模式 & 动态美化 UI
+- 🧠 自定义关键词警告机制
+- 📈 自动获取 GitHub 项目统计信息
 
-## 快速开始
+---
 
-### 1. 环境准备
+## 🚀 快速开始
+
+### 克隆项目
+
 ```bash
-# 安装依赖
-npm install
-npm install dotenv
+git clone https://github.com/LanRhyme/Web-MinecraftLogAnalyzer.git
+cd Web-MinecraftLogAnalyzer
+```
 
-# 设置环境变量（创建.env文件）
+### 安装依赖
+
+```bash
+npm install
+```
+
+### 配置环境变量
+创建 .env 文件，内容如下：
+
+```env
+PORT=3000
 GEMINI_API_KEY=your_gemini_api_key    #设置api key，在此处获取https://aistudio.google.com/app/apikey
 GEMINI_PROXY_TARGET=https://generativelanguage.googleapis.com/   #设置代理地址，用于访问Gemini API，默认无反向代理https://generativelanguage.googleapis.com/
 #推荐项目:https://github.com/DragonEmpery/cfll-gemini
-CUSTOM_KEYWORDS=sodium|iris|xaero|customskinloader   #设置关键词，用于日志关键词检测，使用 | 进行分隔
+CUSTOM_KEYWORDS=sodium|iris|xaero|customskinloader    #设置关键词，用于日志关键词检测，使用 | 进行分隔
+GITHUB_TOKEN=GitHub令牌（可选）  #用于github仓库信息卡片，不用管
 ```
 
-### 2. 运行服务
+### 启动项目
+
 ```bash
-# 开发模式
-npm run dev
-
-# 生产模式
-npm start
+node server.js
 ```
 
-### 3. 部署要求
-* Node.js >=18.0
-* *需要配置反向代理处理Gemini API请求
-* 建议使用PM2进行进程管理
-* 静态资源需支持HTTPS部署
+默认访问地址：http://localhost:3000
 
-## API文档
+## 📁 项目结构
+.
+├── index.html              # 前端界面（使用 Tailwind + Chart.js + Marked）
+├── server.js               # Node.js 后端服务，处理上传、解析、AI 分析
+├── uploads/                # 上传日志文件的临时目录（自动清理）
+├── .env                    # 环境变量配置
+└── README.md               # 项目说明文档
 
-### 1. 日志上传接口
-`POST /api/extract`
-* 参数：multipart/form-data (file字段)
-* 返回：
+## 💡 技术栈
+* 前端：
+ * 🎨 Tailwind CSS + 自定义暗黑主题
+ * 📈 Chart.js 数据可视化
+ * 🧩 FontAwesome 图标系统
+ * 📝 Marked.js 解析 AI 输出的 Markdown 内容
+* 后端：
+ * ⚙️ Express.js 服务
+ * 🤖 Gemini AI 代理调用（支持代理转发）
+ * 📄 自定义正则匹配器（支持 Amethyst、Zalith、Fold Craft 启动器日志格式）
 
-```json
-{
-  "info": {
-    "launcher_version": "1.2.3",
-    "java_version": "17.0.5",
-    "minecraft_version": "1.20.1",
-    "renderer": "OpenGL",
-    "keyword": "sodium"
-  },
-  "log": "原始日志内容"
-}
-```
+## 🔍 支持的启动器
 
-### 2. AI分析接口
-`POST /api/gemini`
-* 参数：
-```json
-{
-  "log": "原始日志文本",
-  "proxy": "可选代理地址"
-}
-```
-- 返回：
-```json
-{
-  "gemini": "AI分析结果文本"
-}
-```
-## 使用说明
-1. 打开网页后点击「选择文件」按钮
-2. 选择Minecraft日志文件（.log/.txt）
-3. 点击「上传日志文件」开始分析
-4. 分析完成后查看
-* 基础信息卡片
-* 错误统计图表
-* AI分析建议
-5. 点击「复制分析内容」可保存结果
+* ✅ Amethyst (Pojav)_iOS
+* ✅ Zalith Launcher
+* ✅ Fold Craft Launcher
 
-## 扩展开发
-1. 添加新错误类型：修改extractInfo()正则表达式
-2. 自定义AI提示词：编辑callGemini()中的prompt参数
-3. 新增可视化图表：扩展Chart.js配置
-4. 添加多语言支持：集成i18n库
+## 🤝 鸣谢
+* PCL2 代码崩溃匹配规则参考 [https://github.com/Meloong-Git/PCL](https://github.com/Meloong-Git/PCL/blob/main/Plain%20Craft%20Launcher%202/Modules/Minecraft/ModCrash.vb)
+* Google Gemini AI 模型支持
+* TailwindCSS 社区设计资源
 
+## 📫 联系我
+欢迎访问个人主页 👉 [https://lanrhyme.netlify.app/](https://lanrhyme.netlify.app/)
+
+或通过 GitHub 提交 Issue！
+
+## ⭐ Star 一下吧！
+如果你觉得这个项目有帮助，欢迎点个 ⭐ Star！

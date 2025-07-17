@@ -4,7 +4,7 @@ const multer = require('multer');
 const cors = require('cors');
 const fs = require('fs');
 const axios = require('axios');
-const path = require('path'); // Import path module
+const path = require('path');
 
 const app = express();
 const upload = multer({ dest: 'uploads/' });
@@ -46,7 +46,7 @@ async function callGemini(log, proxyTarget) {
 function extractInfo(log) {
     const info = {};
     const patterns = {
-        // New section for explicit launcher identification
+        // 为各个启动器的日志设置不同的正则表达式
         launcher_name: [
             { regex: /\[Pre-Init\] (PojavLauncher INIT!|Amethyst INIT!)/, name: 'Amethyst_iOS' },
             { regex: /Info: Launcher version:/, name: 'Zalith Launcher' },
@@ -147,8 +147,7 @@ function extractInfo(log) {
 
 
 /**
- * [V2-增强版] 快速分析函数
- * 深度参考 pcl2 的精准匹配逻辑，对日志进行快速预检，找出明确的错误原因。
+ * 参考 pcl2 的精准匹配逻辑，对日志进行快速预检，找出明确的错误原因
  * @param {string} log - 日志文件内容
  * @returns {string} - 分析结果
  */
@@ -523,7 +522,7 @@ app.get('/api/check-gemini-status', async (req, res) => {
         return res.json({ status: 'error', message: 'GEMINI_PROXY_TARGET 未设置' });
     }
     try {
-        // Attempt a simple request to the proxy target's root or a known endpoint
+        // 尝试对代理目标的根或已知终端节点执行简单请求
         // This is a basic check. A more robust check might involve hitting a specific API endpoint.
         await axios.get(target, { timeout: 5000 }); // 5 second timeout
         res.json({ status: 'ok', message: 'Gemini 代理连接正常' });

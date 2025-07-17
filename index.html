@@ -307,7 +307,7 @@
                 <button id="theme-toggle" class="p-2 rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-800 focus:ring-white">
                     <i class="fas fa-moon text-xl"></i>
                 </button>
-                <a href="lanrhyme.netlify.app" class="amethyst-dark-button hidden md:flex items-center">
+                <a href="https://lanrhyme.netlify.app/" class="amethyst-dark-button hidden md:flex items-center">
                     <i class="fas fa-arrow-left mr-2"></i>返回LanRhyme的个人网站
                 </a>
             </div>
@@ -561,8 +561,17 @@
                     <ul class="list-disc list-inside text-left space-y-1">`;
             for (const key in data1.info) { if (Object.prototype.hasOwnProperty.call(data1.info, key)) { infoHtml += `<li><strong>${infoDisplayMap[key] || key}：</strong>${data1.info[key]}</li>`; } }
             infoHtml += '</ul></div>';
+
+            // Add Quick Analysis Card here
+            infoHtml += `<div id="quickAnalysisCard" class="result-card anim-card mt-6">
+                <h3 class="text-lg font-bold">快速分析结果</h3><hr class="my-3" style="border-color: var(--card-border);">
+                <div class="quick-analysis-content text-left" style="word-wrap: break-word;">${marked.parse(data1.quickAnalysis)}</div>
+            </div>`;
+
             resultDiv.innerHTML = infoHtml;
             setTimeout(() => { document.querySelector('#analysisResult .anim-card').classList.add('active'); }, 50);
+            setTimeout(() => { document.querySelector('#quickAnalysisCard').classList.add('active'); }, 150); // Delay for quick analysis card
+
             resultDiv.innerHTML += `<div id="geminiCard" class="result-card anim-card mt-6">
                     <h3 class="text-lg font-bold">AI 分析结果 (Gemini 2.5 Flash)</h3><hr class="my-3" style="border-color: var(--card-border);">
                     <div class="gemini-content text-left" style="word-wrap: break-word;">分析中，请稍候...</div></div>`;
@@ -577,9 +586,10 @@
                     copyBtn.innerText = '复制分析内容';
                     copyBtn.className = 'mt-4 px-4 py-2 amethyst-dark-button';
                     copyBtn.onclick = function () {
-                        const baseCardText = Array.from(resultDiv.querySelectorAll('.result-card:not(#geminiCard) ul li')).map(li => li.innerText).join('\n');
+                        const baseCardText = Array.from(resultDiv.querySelectorAll('.result-card:not(#geminiCard):not(#quickAnalysisCard) ul li')).map(li => li.innerText).join('\n'); // Exclude quick analysis from base copy
+                        const quickAnalysisText = resultDiv.querySelector('#quickAnalysisCard .quick-analysis-content').innerText;
                         const aiCardText = resultDiv.querySelector('#geminiCard .gemini-content').innerText;
-                        navigator.clipboard.writeText(`【基础信息】\n${baseCardText}\n\n【AI分析】\n${aiCardText}`).then(() => {
+                        navigator.clipboard.writeText(`【基础信息】\n${baseCardText}\n\n【快速分析】\n${quickAnalysisText}\n\n【AI分析】\n${aiCardText}`).then(() => {
                             copyBtn.innerText = '已复制！'; setTimeout(() => { copyBtn.innerText = '复制分析内容'; }, 1500);
                         });
                     };

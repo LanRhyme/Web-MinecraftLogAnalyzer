@@ -17,9 +17,11 @@ const PORT = process.env.PORT || 3000;
 const GEMINI_PROXY_TARGET = process.env.GEMINI_PROXY_TARGET || '';
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY || '';
 const CUSTOM_KEYWORDS_ENV = process.env.CUSTOM_KEYWORDS || '';
+const GITHUB_TOKEN = process.env.GITHUB_TOKEN || ''; // New: GitHub Personal Access Token
 
 console.log('Gemini Key:', GEMINI_API_KEY ? '已设置' : '未设置');
 console.log('Custom Keywords (from .env):', CUSTOM_KEYWORDS_ENV || '未设置');
+console.log('GitHub Token:', GITHUB_TOKEN ? '已设置' : '未设置'); // New: Log GitHub Token status
 
 // Serve static files from the current directory
 app.use(express.static(__dirname));
@@ -275,7 +277,7 @@ function quickAnalysis(log) {
                     return `Mod Mixin 失败，可能与 Mod [${modName}] 有关\n请检查该 Mod 是否与当前游戏版本兼容，或尝试更新/删除该 Mod`;
                 } else if (jsonNameMatches.length > 0) {
                     const jsonNames = jsonNameMatches.map(match => match[0].replace(/mixins\./, '').replace(/\.mixin$/, ''));
-                    return `Mod Mixin 失败，可能与 Mod 配置文件 [${jsonNames.join(', ')}] 有关\n请检查这些配置文件是否正确，或尝试删除/重新生成`;
+                    return `Mod Mixin 失败，可能与 Mod 配置文件 [${jsonNames.join(', 因为它包含特殊字符或已损坏。')}] 有关\n请检查这些配置文件是否正确，或尝试删除/重新生成`;
                 }
                 return null;
             }
@@ -411,6 +413,53 @@ app.post('/api/extract', upload.single('file'), async (req, res) => {
         res.status(500).json({ error: '日志提取失败: ' + error.message });
     }
 });
+
+// New: GitHub Info API
+app.get('/api/github-info', async (req, res) => {
+    const repoOwner = 'LanRhyme';
+    const repoName = 'Web-MinecraftLogAnalyzer';
+    const headers = {
+        'User-Agent': 'Node.js Server',
+        'Accept': 'application/vnd.github.v3+json'
+    };
+
+    if (GITHUB_TOKEN) {
+        headers['Authorization'] = `token ${GITHUB_TOKEN}`;
+    }
+
+    try {
+        // Get repo details for stars
+        const repoResponse = await axios.get(`https://api.github.com/repos/${repoOwner}/${repoName}`, { headers });
+        const stars = repoResponse.data.stargazers_count;
+
+        // Get latest commit date
+        const commitsResponse = await axios.get(`https://api.github.com/repos/${repoOwner}/${repoName}/commits?per_page=1`, { headers });
+        const lastCommitDate = commitsResponse.data[0] ? commitsResponse.data[0].commit.author.date : null;
+
+        res.json({ stars, lastCommitDate });
+    } catch (error) {
+        console.error('Error fetching GitHub info:', error.response?.data || error.message);
+        res.status(500).json({ error: '无法获取 GitHub 信息', details: error.message });
+    }
+});
+
+// New: Check Gemini Proxy Status API
+app.get('/api/check-gemini-status', async (req, res) => {
+    const target = GEMINI_PROXY_TARGET;
+    if (!target) {
+        return res.json({ status: 'error', message: 'GEMINI_PROXY_TARGET 未设置' });
+    }
+    try {
+        // Attempt a simple request to the proxy target's root or a known endpoint
+        // This is a basic check. A more robust check might involve hitting a specific API endpoint.
+        await axios.get(target, { timeout: 5000 }); // 5 second timeout
+        res.json({ status: 'ok', message: 'Gemini 代理连接正常' });
+    } catch (error) {
+        console.error('Error checking Gemini proxy status:', error.message);
+        res.json({ status: 'error', message: 'Gemini 代理连接失败: ' + error.message });
+    }
+});
+
 
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);

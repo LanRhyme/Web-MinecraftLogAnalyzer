@@ -236,7 +236,6 @@
         #custom-menu.visible { opacity: 1; transform: scale(1); }
         .menu-item { display: flex; align-items: center; padding: 0.75rem 1.25rem; cursor: pointer; transition: all 0.2s ease; color: var(--menu-item-text); }
         .menu-item:hover { background-color: var(--menu-item-hover-bg); }
-        .menu-item i { width: 1.5rem; margin-right: 0.75rem; color: var(--menu-item-icon); }
         .menu-divider { border-top: 1px solid var(--menu-divider); margin: 0.25rem 0; }
         .menu-header { padding: 0.5rem 1.25rem; font-size: 0.875rem; color: var(--menu-header-text); text-transform: uppercase; font-weight: 500; }
 
@@ -286,6 +285,12 @@
         .gemini-content a { color: var(--footer-link); text-decoration: underline; }
         .gemini-content a:hover { color: var(--footer-link-hover); }
 
+        /* 新增的样式用于小卡片布局 - 始终并排显示 */
+        .grid-compact {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr); /* Always two columns */
+            gap: 1rem; /* Adjust gap as needed */
+        }
     </style>
 </head>
 
@@ -330,49 +335,58 @@
             <div id="analysisResult" class="mt-8 text-left max-w-3xl mx-auto"></div>
         </section>
 
-        <section class="grid grid-cols-1 lg:grid-cols-2 gap-8 w-full max-w-6xl mx-auto">
-            <div id="analysis" class="solid-card anim-card">
-                <h3 class="text-2xl font-semibold mb-4 flex items-center">
-                        <span class="w-10 h-10 amethyst-bg rounded-full flex items-center justify-center text-white mr-3">
-                            <i class="fas fa-exclamation-triangle"></i>
+        <section class="flex flex-col gap-8 w-full max-w-6xl mx-auto">
+            <div class="grid-compact">
+                <a href="https://github.com/LanRhyme/Web-MinecraftLogAnalyzer" target="_blank" rel="noopener noreferrer" id="github-info" class="solid-card anim-card block cursor-pointer">
+                    <h3 class="text-lg font-semibold mb-2 flex items-center">
+                        <span class="w-7 h-7 amethyst-bg rounded-full flex items-center justify-center text-white mr-2 text-sm">
+                            <i class="fab fa-github"></i>
                         </span>
-                    错误统计*没写
-                </h3>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                    <div>
-                        <h4 class="font-medium mb-2">错误类型分布</h4>
-                        <div class="chart-container">
-                            <canvas id="errorChart"></canvas>
-                        </div>
+                        GitHub 项目信息
+                    </h3>
+                    <div class="text-sm space-y-1">
+                        <p>Stars: <span id="github-stars" class="font-medium">加载中...</span></p>
+                        <p>Last Commit: <span id="github-commit" class="font-medium">加载中...</span></p>
+                        <p class="mt-1 text-xs opacity-75">数据来自 LanRhyme/Web-MinecraftLogAnalyzer</p>
                     </div>
-                    <div>
-                        <h4 class="font-medium mb-3">常见错误</h4>
-                        <div class="space-y-3">
-                            <div class="bg-red-50 p-3 rounded-lg">
-                                <div class="flex justify-between items-center"><span class="font-medium text-red-700">sodium!!!</span><span class="text-sm bg-red-100 text-red-800 px-2 py-1 rounded">32次</span></div>
-                                <p class="text-sm mt-1" style="color: var(--footer-text);">别jb用优化模组了</p>
-                            </div>
-                            <div class="bg-yellow-50 p-3 rounded-lg">
-                                <div class="flex justify-between items-center"><span class="font-medium text-yellow-700">网络问题</span><span class="text-sm bg-yellow-100 text-yellow-800 px-2 py-1 rounded">18次</span></div>
-                                <p class="text-sm mt-1" style="color: var(--footer-text);">梯子是个好东西</p>
-                            </div>
-                            <div class="bg-blue-50 p-3 rounded-lg">
-                                <div class="flex justify-between items-center"><span class="font-medium text-blue-700">渲染器崩溃</span><span class="text-sm bg-blue-100 text-blue-800 px-2 py-1 rounded">12次</span></div>
-                                <p class="text-sm mt-1" style="color: var(--footer-text);">自动！自动！自动！</p>
-                            </div>
-                        </div>
+                </a>
+
+                <div id="ai-status" class="solid-card anim-card">
+                    <h3 class="text-lg font-semibold mb-2 flex items-center">
+                        <span class="w-7 h-7 amethyst-bg rounded-full flex items-center justify-center text-white mr-2 text-sm">
+                            <i class="fas fa-robot"></i>
+                        </span>
+                        AI 服务状态
+                    </h3>
+                    <div class="text-sm space-y-1">
+                        <p>Gemini AI: <span id="gemini-status" class="font-medium">检测中...</span></p>
+                        <p class="mt-1 text-xs opacity-75">Gemini 2.5 Flash</p>
                     </div>
                 </div>
             </div>
 
-            <div id="visualization" class="solid-card anim-card">
-                <h3 class="text-2xl font-semibold mb-4 flex items-center">
-                        <span class="w-10 h-10 amethyst-bg rounded-full flex items-center justify-center text-white mr-3">
-                            <i class="fas fa-chart-line"></i>
-                        </span>
-                    玩家每日上传日志数量
+            <div id="upload-stats" class="solid-card anim-card w-full">
+                <h3 class="text-xl font-semibold mb-4 flex items-center">
+                    <span class="w-8 h-8 amethyst-bg rounded-full flex items-center justify-center text-white mr-3">
+                        <i class="fas fa-chart-bar"></i>
+                    </span>
+                    日志上传统计
                 </h3>
-                <div class="chart-container">
+                <div class="grid grid-cols-3 gap-2 text-center text-sm mb-4">
+                    <div>
+                        <p class="font-bold text-lg" id="total-uploads">0</p>
+                        <p class="opacity-75">总数</p>
+                    </div>
+                    <div>
+                        <p class="font-bold text-lg" id="weekly-uploads">0</p>
+                        <p class="opacity-75">本周</p>
+                    </div>
+                    <div>
+                        <p class="font-bold text-lg" id="daily-uploads">0</p>
+                        <p class="opacity-75">今日</p>
+                    </div>
+                </div>
+                <div class="chart-container" style="height: 180px;">
                     <canvas id="uploadChart"></canvas>
                 </div>
             </div>
@@ -501,32 +515,81 @@
     });
 
     // 更新图表颜色
+    let uploadChartInstance = null; // Declare a variable for the Chart instance
+
     function updateChartColors() {
         setTimeout(() => {
             const textColor = getComputedStyle(document.documentElement).getPropertyValue('--text-primary').trim();
             const gridColor = getComputedStyle(document.documentElement).getPropertyValue('--card-border').trim();
-            [Chart.getChart('errorChart'), Chart.getChart('uploadChart')].forEach(chart => {
-                if (chart) {
-                    chart.options.plugins.legend.labels.color = textColor;
-                    if(chart.options.scales.y) {
-                        chart.options.scales.y.ticks.color = textColor;
-                        chart.options.scales.y.grid.color = gridColor;
-                    }
-                    if(chart.options.scales.x) chart.options.scales.x.ticks.color = textColor;
-                    chart.update();
+
+            if (uploadChartInstance) { // Check if chart instance exists
+                uploadChartInstance.options.plugins.legend.labels.color = textColor;
+                if(uploadChartInstance.options.scales.y) {
+                    uploadChartInstance.options.scales.y.ticks.color = textColor;
+                    uploadChartInstance.options.scales.y.grid.color = gridColor;
                 }
-            });
+                if(uploadChartInstance.options.scales.x) uploadChartInstance.options.scales.x.ticks.color = textColor;
+                uploadChartInstance.update();
+            }
         }, 50);
     }
 
     // DOM加载完成后初始化
     document.addEventListener('DOMContentLoaded', function () {
         loadTheme();
-        const errorCtx = document.getElementById('errorChart').getContext('2d');
-        new Chart(errorCtx, { type: 'doughnut', data: { labels: ['网络问题', '模组问题', '渲染器问题', '启动器本身', '其他'], datasets: [{ data: [32, 18, 12, 8, 5], backgroundColor: ['rgba(239, 68, 68, 0.7)', 'rgba(234, 179, 8, 0.7)', 'rgba(59, 130, 246, 0.7)', 'rgba(139, 92, 246, 0.7)', 'rgba(75, 85, 99, 0.7)'], borderWidth: 1 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'right' } } } });
+
         const uploadCtx = document.getElementById('uploadChart').getContext('2d');
-        new Chart(uploadCtx, { type: 'bar', data: { labels: ['周一', '周二', '周三', '周四', '周五', '周六', '周日'], datasets: [{ label: '上传日志数量', data: [15, 18, 22, 20, 25, 30, 28], backgroundColor: 'rgba(40, 167, 69, 0.7)', borderWidth: 1 }] }, options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true }, x: { grid: { display: false } } } } });
+        uploadChartInstance = new Chart(uploadCtx, { // Assign the new Chart instance to the variable
+            type: 'line', // Changed to line chart
+            data: {
+                labels: ['周一', '周二', '周三', '周四', '周五', '周六', '周日'],
+                datasets: [{
+                    label: '上传日志数量',
+                    data: [15, 18, 22, 20, 25, 30, 28], // Example data, replace with real data from backend
+                    backgroundColor: 'rgba(40, 167, 69, 0.3)', // Light background for line chart area
+                    borderColor: 'var(--amethyst-color)', // Line color
+                    borderWidth: 2,
+                    fill: true, // Fill the area under the line
+                    tension: 0.3 // Smooth the line
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false // Hide legend for cleaner look
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        grid: {
+                            color: 'var(--card-border)' // Use card border color for grid
+                        },
+                        ticks: {
+                            color: 'var(--text-primary)' // Use primary text color for ticks
+                        }
+                    },
+                    x: {
+                        grid: {
+                            display: false
+                        },
+                        ticks: {
+                            color: 'var(--text-primary)' // Use primary text color for ticks
+                        }
+                    }
+                }
+            }
+        });
         updateChartColors(); // Initial call
+        fetchGitHubInfo();
+        checkAiStatus();
+
+        // Dummy data for upload stats - replace with actual backend data
+        document.getElementById('total-uploads').innerText = '250'; // Example total
+        document.getElementById('weekly-uploads').innerText = '120'; // Example weekly
+        document.getElementById('daily-uploads').innerText = '25';  // Example daily
     });
 
     // 卡片入场动画
@@ -540,6 +603,47 @@
     // 警告弹窗
     function showWarningPopup(keyword, description) { document.getElementById('warningKeyword').innerText = keyword; document.getElementById('warningDescription').innerText = description; document.getElementById('warningPopup').classList.remove('hidden'); }
     function hideWarningPopup() { document.getElementById('warningPopup').classList.add('hidden'); }
+
+    // 获取 GitHub 项目信息
+    async function fetchGitHubInfo() {
+        try {
+            const response = await fetch('/api/github-info');
+            const data = await response.json();
+            if (data.error) {
+                document.getElementById('github-stars').innerText = 'N/A';
+                document.getElementById('github-commit').innerText = 'N/A';
+                console.error('获取 GitHub 信息失败:', data.error);
+                return;
+            }
+            document.getElementById('github-stars').innerText = data.stars || 'N/A';
+            document.getElementById('github-commit').innerText = data.lastCommitDate ? new Date(data.lastCommitDate).toLocaleDateString() : 'N/A';
+        } catch (error) {
+            document.getElementById('github-stars').innerText = 'N/A';
+            document.getElementById('github-commit').innerText = 'N/A';
+            console.error('获取 GitHub 信息异常:', error);
+        }
+    }
+
+    // 检查 AI 代理状态
+    async function checkAiStatus() {
+        const geminiStatusElem = document.getElementById('gemini-status');
+        try {
+            const response = await fetch('/api/check-gemini-status');
+            const data = await response.json();
+            if (data.status === 'ok') {
+                geminiStatusElem.innerText = '在线';
+                geminiStatusElem.style.color = 'var(--amethyst-color)';
+            } else {
+                geminiStatusElem.innerText = '离线 / 错误';
+                geminiStatusElem.style.color = 'var(--text-red-700)';
+                console.warn('Gemini AI 状态检测失败:', data.message);
+            }
+        } catch (error) {
+            geminiStatusElem.innerText = '无法连接';
+            geminiStatusElem.style.color = 'var(--text-red-700)';
+            console.error('检查 Gemini AI 状态异常:', error);
+        }
+    }
 
     // 日志上传与分析
     document.getElementById('uploadBtn').onclick = async function () {

@@ -43,7 +43,6 @@
             --menu-item-hover-bg: #f3f4f6;
             --menu-divider: #e5e7eb;
             --menu-header-text: #9ca3af;
-            --bg-image: url('img/background10-light.jpg');
 
             /* 错误提示颜色 */
             --text-red-700: #b91c1c;
@@ -87,7 +86,6 @@
             --menu-item-hover-bg: #4a5568;
             --menu-divider: #4a5568;
             --menu-header-text: #a0aec0;
-            --bg-image: url('img/background10-dark.jpg');
 
             /* 错误提示颜色 (Dark) */
             --text-red-700: #ef4444;
@@ -136,7 +134,6 @@
             width: 100vw;
             height: 100vh;
             pointer-events: none;
-            background-image: var(--bg-image);
             background-position: center;
             background-size: cover;
             transition: background-image 0.3s ease;
@@ -154,7 +151,7 @@
         /* ADDED: Hover effect for solid-card */
         .solid-card:hover {
             transform: scale(1.02);
-            box-shadow: var(--card-shadow-hover); /* Optional: add a hover shadow variable if needed */
+            /*box-shadow: var(--card-shadow-hover);*/ /* 可选：如果需要，添加悬停阴影变量 */
         }
 
         .header-card {

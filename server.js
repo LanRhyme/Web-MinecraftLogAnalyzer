@@ -81,9 +81,6 @@ function extractInfo(log) {
         ],
         minecraft_version: [
             { regex: /Info: Selected Minecraft version: (.*?)\n/, key: 'Minecraft Version' }, // Zalith Launcher
-            { regex: /\[MCDL\] Downloading ([0-9]+\.[0-9]+(?:\.[0-9]+)?)\.json/, key: 'Minecraft Version' }, // Amethyst_iOS
-            { regex: /forge-([0-9]+\.[0-9]+(?:\.[0-9]+)?(?:-rc[0-9]+)?)-/, key: 'Minecraft Version' }, // Fold Craft (from mod list or args)
-            { regex: /fabric-loader-(\d+\.\d+\.\d+)-(\d+\.\d+\.\d+)/, key: 'Minecraft Version' }, // Amethyst/Fold Craft (from fabric loader)
             { regex: /Launching Minecraft .*?-([0-9]+\.[0-9]+(?:\.[0-9]+)?(?:-rc[0-9]+)?)\n/, key: 'Minecraft Version' } // Existing, general
         ],
         commit: [

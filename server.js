@@ -503,6 +503,7 @@ app.get('/api/github-info', async (req, res) => {
 
         // Get latest commit date
         const commitsResponse = await axios.get(`https://api.github.com/repos/${repoOwner}/${repoName}/commits?per_page=1`, { headers });
+        // MODIFIED: Ensure lastCommitDate is the raw date string from GitHub
         const lastCommitDate = commitsResponse.data[0] ? commitsResponse.data[0].commit.author.date : null;
 
         res.json({ stars, lastCommitDate });
@@ -516,16 +517,21 @@ app.get('/api/github-info', async (req, res) => {
 app.get('/api/check-gemini-status', async (req, res) => {
     const target = GEMINI_PROXY_TARGET;
     if (!target) {
-        return res.json({ status: 'error', message: 'GEMINI_PROXY_TARGET 未设置' });
+        return res.json({ status: 'error', message: 'GEMINI_PROXY_TARGET 未设置', latency: 'N/A' });
     }
+    const startTime = Date.now();
     try {
         // 尝试对代理目标的根或已知终端节点执行简单请求
         // This is a basic check. A more robust check might involve hitting a specific API endpoint.
         await axios.get(target, { timeout: 5000 }); // 5 second timeout
-        res.json({ status: 'ok', message: 'Gemini 代理连接正常' });
+        const endTime = Date.now();
+        const latency = endTime - startTime;
+        res.json({ status: 'ok', message: 'Gemini 代理连接正常', latency: latency });
     } catch (error) {
+        const endTime = Date.now();
+        const latency = endTime - startTime; // Still calculate latency even on error
         console.error('Error checking Gemini proxy status:', error.message);
-        res.json({ status: 'error', message: 'Gemini 代理连接失败: ' + error.message });
+        res.json({ status: 'error', message: 'Gemini 代理连接失败: ' + error.message, latency: latency });
     }
 });
 

@@ -474,65 +474,74 @@ app.get('/api/stats', (req, res) => {
         dailyTrend: Array(7).fill(0) // 为过去7天初始化数组 [6天前, ..., 今天]
     };
 
-    const now = new Date();
-    // “今天”的开始时间
-    const todayStart = new Date();
-    todayStart.setHours(0, 0, 0, 0);
-
-    // 7天前的日期
-    const sevenDaysAgoDate = new Date();
-    sevenDaysAgoDate.setDate(now.getDate() - 7);
-
+    // 使用db.serialize确保查询按顺序执行
     db.serialize(() => {
-        // 获取总数
+        // 1. 获取总数 (此查询不变)
         db.get("SELECT COUNT(*) as count FROM upload_stats", [], (err, row) => {
             if (err) {
                 console.error("查询总数失败:", err.message);
                 return res.status(500).json({ error: '获取总数统计失败' });
             }
             stats.total = row.count || 0;
+        });
 
-            // 获取今日数量 (从今天零点开始)
-            db.get("SELECT COUNT(*) as count FROM upload_stats WHERE timestamp >= ?", [todayStart.toISOString()], (err, row) => {
-                if (err) {
-                    console.error("查询每日数量失败:", err.message);
-                    return res.status(500).json({ error: '获取每日统计失败' });
+        // 2. 获取今日数量 (使用SQLite的 'now' 和 'start of day')
+        // 这会获取服务器当前日期（UTC）从0点开始的记录
+        db.get("SELECT COUNT(*) as count FROM upload_stats WHERE timestamp >= DATE('now', 'start of day')", [], (err, row) => {
+            if (err) {
+                console.error("查询每日数量失败:", err.message);
+                return res.status(500).json({ error: '获取每日统计失败' });
+            }
+            stats.daily = row.count || 0;
+        });
+
+        // 3. 获取本周数量 (使用SQLite的 'now' 和 '-7 days')
+        db.get("SELECT COUNT(*) as count FROM upload_stats WHERE timestamp >= DATE('now', '-7 days')", [], (err, row) => {
+            if (err) {
+                console.error("查询每周数量失败:", err.message);
+                return res.status(500).json({ error: '获取每周统计失败' });
+            }
+            stats.weekly = row.count || 0;
+        });
+
+        // 4. 获取过去7天的上传趋势
+        // - 按天分组 (`DATE(timestamp)`)
+        // - 筛选最近7天的数据 (`DATE('now', '-6 days')` 包括今天在内一共7天)
+        const trendQuery = `
+            SELECT 
+                DATE(timestamp) as upload_day, 
+                COUNT(*) as count 
+            FROM upload_stats 
+            WHERE timestamp >= DATE('now', '-6 days')
+            GROUP BY upload_day;
+        `;
+        db.all(trendQuery, [], (err, rows) => {
+            if (err) {
+                console.error("查询趋势数据失败:", err.message);
+                return res.status(500).json({ error: '获取趋势数据失败' });
+            }
+
+            // 5. 将查询到的数据填充到 dailyTrend 数组中
+            // 因为查询只返回有数据的日期，我们需要手动处理没有数据的日期（补0）
+            rows.forEach(row => {
+                // 计算日期差异
+                const day = new Date(row.upload_day);
+                const today = new Date();
+                // 将时间都设置为UTC的0点，以精确计算天数差异
+                day.setUTCHours(0, 0, 0, 0);
+                today.setUTCHours(0, 0, 0, 0);
+
+                const diffTime = today.getTime() - day.getTime();
+                const diffDays = Math.round(diffTime / (1000 * 60 * 60 * 24));
+
+                if (diffDays >= 0 && diffDays < 7) {
+                    const index = 6 - diffDays; // 数组索引: 0是6天前, ..., 6是今天
+                    stats.dailyTrend[index] = row.count;
                 }
-                stats.daily = row.count || 0;
-
-                // 获取本周数量 (过去7天内)
-                db.get("SELECT COUNT(*) as count FROM upload_stats WHERE timestamp >= ?", [sevenDaysAgoDate.toISOString()], (err, row) => {
-                    if (err) {
-                        console.error("查询每周数量失败:", err.message);
-                        return res.status(500).json({ error: '获取每周统计失败' });
-                    }
-                    stats.weekly = row.count || 0;
-
-                    // 获取过去7天的所有上传记录以计算趋势
-                    db.all("SELECT timestamp FROM upload_stats WHERE timestamp >= ?", [sevenDaysAgoDate.toISOString()], (err, rows) => {
-                        if (err) {
-                            console.error("查询趋势数据失败:", err.message);
-                            return res.status(500).json({ error: '获取趋势数据失败' });
-                        }
-
-                        rows.forEach(row => {
-                            const timestampDate = new Date(row.timestamp);
-                            const diffTime = todayStart.getTime() - new Date(timestampDate).setHours(0, 0, 0, 0);
-                            const diffDays = Math.round(diffTime / (1000 * 60 * 60 * 24));
-
-                            // diffDays: 0是今天, 1是昨天, ..., 6是6天前
-                            if (diffDays >= 0 && diffDays < 7) {
-                                const index = 6 - diffDays; // 数组索引: 0是6天前, ..., 6是今天
-                                if (stats.dailyTrend[index] !== undefined) {
-                                    stats.dailyTrend[index]++;
-                                }
-                            }
-                        });
-
-                        res.json(stats);
-                    });
-                });
             });
+
+            // 6. 所有查询完成后，发送最终结果
+            res.json(stats);
         });
     });
 });

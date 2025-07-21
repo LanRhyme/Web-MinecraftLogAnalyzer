@@ -485,9 +485,9 @@ app.get('/api/stats', (req, res) => {
             stats.total = row.count || 0;
         });
 
-        // 2. 获取今日数量 (使用SQLite的 'now' 和 'start of day')
-        // 这会获取服务器当前日期（UTC）从0点开始的记录
-        db.get("SELECT COUNT(*) as count FROM upload_stats WHERE timestamp >= DATE('now', 'start of day')", [], (err, row) => {
+        // 2. 获取今日数量 (使用 'localtime' 修饰符，与本地时间存储的timestamp保持一致)
+        // 假设 timestamp 已经存储为本地时间
+        db.get(`SELECT COUNT(*) as count FROM upload_stats WHERE timestamp >= DATE('now', 'start of day', 'localtime')`, [], (err, row) => {
             if (err) {
                 console.error("查询每日数量失败:", err.message);
                 return res.status(500).json({ error: '获取每日统计失败' });
@@ -495,8 +495,9 @@ app.get('/api/stats', (req, res) => {
             stats.daily = row.count || 0;
         });
 
-        // 3. 获取本周数量 (使用SQLite的 'now' 和 '-7 days')
-        db.get("SELECT COUNT(*) as count FROM upload_stats WHERE timestamp >= DATE('now', '-7 days')", [], (err, row) => {
+        // 3. 获取本周数量 (使用 'localtime' 修饰符)
+        // 假设 timestamp 已经存储为本地时间
+        db.get(`SELECT COUNT(*) as count FROM upload_stats WHERE timestamp >= DATE('now', '-7 days', 'localtime')`, [], (err, row) => {
             if (err) {
                 console.error("查询每周数量失败:", err.message);
                 return res.status(500).json({ error: '获取每周统计失败' });
@@ -504,15 +505,14 @@ app.get('/api/stats', (req, res) => {
             stats.weekly = row.count || 0;
         });
 
-        // 4. 获取过去7天的上传趋势
-        // - 按天分组 (`DATE(timestamp)`)
-        // - 筛选最近7天的数据 (`DATE('now', '-6 days')` 包括今天在内一共7天)
+        // 4. 获取过去7天的上传趋势 (使用 'localtime' 修饰符)
+        // 假设 timestamp 已经存储为本地时间
         const trendQuery = `
-            SELECT 
-                DATE(timestamp) as upload_day, 
-                COUNT(*) as count 
-            FROM upload_stats 
-            WHERE timestamp >= DATE('now', '-6 days')
+            SELECT
+                DATE(timestamp, 'localtime') as upload_day, -- 如果 timestamp 已经是本地时间，直接使用 DATE(timestamp) 也可以
+                COUNT(*) as count
+            FROM upload_stats
+            WHERE timestamp >= DATE('now', '-6 days', 'localtime')
             GROUP BY upload_day;
         `;
         db.all(trendQuery, [], (err, rows) => {
@@ -521,24 +521,21 @@ app.get('/api/stats', (req, res) => {
                 return res.status(500).json({ error: '获取趋势数据失败' });
             }
 
-            // 5. 将查询到的数据填充到 dailyTrend 数组中
-            // 因为查询只返回有数据的日期，我们需要手动处理没有数据的日期（补0）
+            // 生成过去7天的日期数组（本地时间）
+            const dates = [];
+            for (let i = 6; i >= 0; i--) {
+                const d = new Date();
+                d.setDate(d.getDate() - i);
+                dates.push(d.toISOString().split('T')[0]); // 获取 YYYY-MM-DD 格式
+            }
+
+            // 将查询到的数据映射到 dailyTrend 数组中
+            const trendMap = new Map();
             rows.forEach(row => {
-                // 计算日期差异
-                const day = new Date(row.upload_day);
-                const today = new Date();
-                // 将时间都设置为UTC的0点，以精确计算天数差异
-                day.setUTCHours(0, 0, 0, 0);
-                today.setUTCHours(0, 0, 0, 0);
-
-                const diffTime = today.getTime() - day.getTime();
-                const diffDays = Math.round(diffTime / (1000 * 60 * 60 * 24));
-
-                if (diffDays >= 0 && diffDays < 7) {
-                    const index = 6 - diffDays; // 数组索引: 0是6天前, ..., 6是今天
-                    stats.dailyTrend[index] = row.count;
-                }
+                trendMap.set(row.upload_day, row.count);
             });
+
+            stats.dailyTrend = dates.map(date => trendMap.get(date) || 0);
 
             // 6. 所有查询完成后，发送最终结果
             res.json(stats);

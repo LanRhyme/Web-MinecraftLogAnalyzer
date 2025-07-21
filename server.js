@@ -5,6 +5,7 @@ const cors = require('cors');
 const fs = require('fs');
 const axios = require('axios');
 const path = require('path');
+const sqlite3 = require('sqlite3').verbose();
 
 const app = express();
 const upload = multer({ dest: 'uploads/' });
@@ -14,19 +15,27 @@ app.use(express.json({ limit: '8mb' }));
 
 const PORT = process.env.PORT || 3000;
 
+const db = new sqlite3.Database('./stats.db', sqlite3.OPEN_READWRITE | sqlite3.OPEN_CREATE, (err) => {
+    if (err) {
+        console.error('数据库连接失败:', err.message);
+    } else {
+        console.log('成功连接到SQLite数据库。');
+        db.run('CREATE TABLE IF NOT EXISTS upload_stats (id INTEGER PRIMARY KEY AUTOINCREMENT, timestamp DATETIME DEFAULT CURRENT_TIMESTAMP)');
+    }
+});
+
+
 const GEMINI_PROXY_TARGET = process.env.GEMINI_PROXY_TARGET || '';
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY || '';
 const CUSTOM_KEYWORDS_ENV = process.env.CUSTOM_KEYWORDS || '';
-const GITHUB_TOKEN = process.env.GITHUB_TOKEN || ''; // New: GitHub Personal Access Token
+const GITHUB_TOKEN = process.env.GITHUB_TOKEN || '';
 
 console.log('Gemini Key:', GEMINI_API_KEY ? '已设置' : '未设置');
 console.log('Custom Keywords (from .env):', CUSTOM_KEYWORDS_ENV || '未设置');
-console.log('GitHub Token:', GITHUB_TOKEN ? '已设置' : '未设置'); // New: Log GitHub Token status
+console.log('GitHub Token:', GITHUB_TOKEN ? '已设置' : '未设置');
 
-// Serve static files from the current directory
 app.use(express.static(__dirname));
 
-// Gemini API 调用函数
 async function callGemini(log, proxyTarget) {
     const target = proxyTarget || GEMINI_PROXY_TARGET;
     const url = `${target}v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_API_KEY}`;
@@ -42,11 +51,9 @@ async function callGemini(log, proxyTarget) {
     }
 }
 
-// 日志信息提取函数
 function extractInfo(log) {
     const info = {};
     const patterns = {
-        // 为各个启动器的日志设置不同的正则表达式
         launcher_name: [
             { regex: /\[Pre-Init\] (PojavLauncher INIT!|Amethyst INIT!)/, name: 'Amethyst_iOS' },
             { regex: /Info: Launcher version:/, name: 'Zalith Launcher' },
@@ -102,32 +109,27 @@ function extractInfo(log) {
 
     const detectedKeywords = new Set();
 
-    // First, try to identify the launcher and set info.launcher_name
     for (const patternObj of patterns.launcher_name) {
         if (log.match(patternObj.regex)) {
             info.launcher_name = patternObj.name;
-            break; // Stop after the first match
+            break;
         }
     }
 
     for (const category in patterns) {
-        // Skip 'launcher_name' as it's handled above, and 'keyword_regex' as it's a special case
         if (category === 'launcher_name') {
             continue;
         }
 
-        // Handle keyword_regex separately
         if (category === 'keyword_regex') {
             const match = log.match(/\[(.*?)\] Failed to load/);
             if (match && match[1] !== undefined) detectedKeywords.add(match[1].trim());
             continue;
         }
 
-        // Iterate through the array of regex patterns for each category
         for (const patternObj of patterns[category]) {
             const match = log.match(patternObj.regex);
             if (match && match[1] !== undefined) {
-                // If a match is found, store it with the specified key and break to the next category
                 info[patternObj.key] = match[1].trim();
                 break;
             }
@@ -143,23 +145,13 @@ function extractInfo(log) {
 }
 
 
-/**
- * 参考 pcl2 的精准匹配逻辑，对日志进行快速预检，找出明确的错误原因
- * @param {string} log - 日志文件内容
- * @returns {string} - 分析结果
- */
 function quickAnalysis(log) {
-    const results = []; // Array to store all matching analysis results
-
-    // Rule array, each rule contains keywords, matching logic, and the returned solution
-    // Solution text directly from ModCrash.txt
+    const results = [];
     const checks = [
-        // --- Fabric/Forge Specific Solutions (Prioritized) ---
         {
             keywords: ["A potential solution has been determined:", "A potential solution has been determined, this may resolve your problem:", "确定了一种可能的解决方法，这样做可能会解决你的问题："],
             logic: 'any',
             dynamicReason: (log) => {
-                // Find the starting keyword and its position
                 const startIndexMatch = log.match(/(A potential solution has been determined:|A potential solution has been determined, this may resolve your problem:|确定了一种可能的解决方法，这样做可能会解决你的问题：)\s*[\n\r]+/);
 
                 if (startIndexMatch) {
@@ -167,12 +159,9 @@ function quickAnalysis(log) {
                     const relevantLogSection = log.substring(startIndex);
 
                     const solutionLines = [];
-                    // Regex to match lines starting with optional whitespace (tabs or spaces), then '-', then optional whitespace, then any character
-                    const lineRegex = /^[\t ]*-\s*(.+)/gm; // 'g' for matchAll, 'm' for multiline matching (^)
+                    const lineRegex = /^[\t ]*-\s*(.+)/gm;
                     let match;
                     while ((match = lineRegex.exec(relevantLogSection)) !== null) {
-                        // match[0] contains the full matched string (e.g., "\t - Mod '...'")
-                        // trimEnd() removes any trailing whitespace from the line
                         solutionLines.push(match[0].trimEnd());
                     }
 
@@ -180,7 +169,7 @@ function quickAnalysis(log) {
                         return `Fabric 提供了解决方案：\n${solutionLines.join('\n')}\n\n请根据上述信息进行对应处理，如果看不懂英文可以使用翻译软件`;
                     }
                 }
-                return null; // Return null if no specific solution found by this rule
+                return null;
             }
         },
         {
@@ -193,7 +182,6 @@ function quickAnalysis(log) {
                 return null;
             }
         },
-        // --- General Environment Issues ---
         {
             keywords: ["java.lang.OutOfMemoryError", "an out of memory error", "Out of Memory Error"],
             reason: "Minecraft 内存不足，导致其无法继续运行\n这很可能是因为电脑内存不足、游戏分配的内存不足，或是配置要求过高\n\n你可以尝试在启动设置中增加为游戏分配的内存，并删除配置要求较高的材质、Mod、光影"
@@ -255,7 +243,6 @@ function quickAnalysis(log) {
             keywords: ["Manually triggered debug crash"],
             reason: "玩家手动触发了调试崩溃"
         },
-        // --- Mod Related Issues ---
         {
             keywords: ["The directories below appear to be extracted jar files. Fix this before you continue.", "Extracted mod jars found, loading will NOT continue"],
             logic: 'any',
@@ -297,7 +284,7 @@ function quickAnalysis(log) {
             reason: "检测到重复安装的 Mod，这会导致冲突\n请删除重复的 Mod 文件"
         },
         {
-            keywords: ["Incompatible mods found!"], // Keep this generic one, but ensure specific solutions are above it
+            keywords: ["Incompatible mods found!"],
             reason: "检测到不兼容的 Mod，这会导致游戏崩溃\n请检查 Mod 列表，移除不兼容的 Mod"
         },
         {
@@ -334,10 +321,9 @@ function quickAnalysis(log) {
             keywords: ["Mixin prepare failed", "Mixin apply failed", "MixinApplyError", "MixinTransformerError", "mixin.injection.throwables.", ".json] FAILED during "],
             logic: 'any',
             dynamicReason: (log) => {
-                const modNameMatch1 = log.match(/(?<=from mod )[^.\/ ]+(?=\])/); // e.g., from mod simpleplanes]
-                const modNameMatch2 = log.match(/(?<=for mod )[^.\/ ]+(?= failed)/); // e.g., for mod sodium failed
-                const jsonNameMatches = [...log.matchAll(/(?<=^[^ \t]+[ \[({]{1})[^ \[({]+\.[^ ]+(?=\.json)/gm)]; // Capture json files like "mixins.example.json"
-
+                const modNameMatch1 = log.match(/(?<=from mod )[^.\/ ]+(?=\])/);
+                const modNameMatch2 = log.match(/(?<=for mod )[^.\/ ]+(?= failed)/);
+                const jsonNameMatches = [...log.matchAll(/(?<=^[^ \t]+[ \[({]{1})[^ \[({]+\.[^ ]+(?=\.json)/gm)];
                 let modName = null;
                 if (modNameMatch1) modName = modNameMatch1[0].trim();
                 else if (modNameMatch2) modName = modNameMatch2[0].trim();
@@ -354,11 +340,9 @@ function quickAnalysis(log) {
         {
             keywords: ["Caught exception from "],
             dynamicReason: (log) => {
-                // This regex tries to capture text after "Caught exception from " up to a newline,
-                // optionally including a bracketed version/ID like "[modid]" or "[1.0.0]"
                 const modNameMatch = log.match(/(?<=Caught exception from )([^\n\r]+?)(?=\n|\r|$)/);
                 if (modNameMatch) {
-                    const modName = modNameMatch[1].trim(); // Use group 1 to exclude potential trailing whitespace/newlines
+                    const modName = modNameMatch[1].trim();
                     return `Mod [${modName}] 导致游戏崩溃\n请检查该 Mod 是否与当前游戏版本兼容，或尝试更新/删除该 Mod`;
                 }
                 return null;
@@ -367,7 +351,6 @@ function quickAnalysis(log) {
         {
             keywords: ["LoaderExceptionModCrash: Caught exception from "],
             dynamicReason: (log) => {
-                // Similar to above, but for LoaderExceptionModCrash
                 const modNameMatch = log.match(/(?<=LoaderExceptionModCrash: Caught exception from )([^\n\r]+?)(?=\n|\r|$)/);
                 if (modNameMatch) {
                     const modName = modNameMatch[1].trim();
@@ -407,7 +390,6 @@ function quickAnalysis(log) {
 
     for (const check of checks) {
         let matched = false;
-        // Check for keyword presence first
         if (check.logic === 'all') {
             matched = check.keywords.every(keyword => log.includes(keyword));
         } else {
@@ -429,24 +411,19 @@ function quickAnalysis(log) {
     }
 
     if (results.length > 0) {
-        // Separate the first result as "main" and others as "additional"
         const mainProblem = results[0];
         const otherProblems = results.slice(1);
-
         let finalResult = `【快速分析】\n主要问题：\n${mainProblem}`;
-
         if (otherProblems.length > 0) {
             finalResult += `\n\n--- 其他可能的问题 ---\n\n${otherProblems.join('\n\n')}`;
         }
         return finalResult;
     }
 
-    // Default return if no specific issue is found
     return "未在快速分析中发现明显问题，建议等待AI的详细分析";
 }
 
 
-// AI 分析接口
 app.post('/api/gemini', async (req, res) => {
     try {
         if (!req.body.log) {
@@ -460,7 +437,6 @@ app.post('/api/gemini', async (req, res) => {
     }
 });
 
-// 只提取基础信息
 app.post('/api/extract', upload.single('file'), async (req, res) => {
     try {
         if (!req.file) {
@@ -468,6 +444,12 @@ app.post('/api/extract', upload.single('file'), async (req, res) => {
         }
         const log = fs.readFileSync(req.file.path, 'utf-8');
         fs.unlinkSync(req.file.path);
+
+        db.run('INSERT INTO upload_stats DEFAULT VALUES', (err) => {
+            if (err) {
+                console.error('记录上传数据失败:', err.message);
+            }
+        });
 
         const info = extractInfo(log);
         const quickAnalysisResult = quickAnalysis(log);
@@ -483,7 +465,79 @@ app.post('/api/extract', upload.single('file'), async (req, res) => {
     }
 });
 
-// New: GitHub Info API
+// --- 修改：更新统计API以提供图表数据 ---
+app.get('/api/stats', (req, res) => {
+    const stats = {
+        total: 0,
+        daily: 0,
+        weekly: 0,
+        dailyTrend: Array(7).fill(0) // 为过去7天初始化数组 [6天前, ..., 今天]
+    };
+
+    const now = new Date();
+    // “今天”的开始时间
+    const todayStart = new Date();
+    todayStart.setHours(0, 0, 0, 0);
+
+    // 7天前的日期
+    const sevenDaysAgoDate = new Date();
+    sevenDaysAgoDate.setDate(now.getDate() - 7);
+
+    db.serialize(() => {
+        // 获取总数
+        db.get("SELECT COUNT(*) as count FROM upload_stats", [], (err, row) => {
+            if (err) {
+                console.error("查询总数失败:", err.message);
+                return res.status(500).json({ error: '获取总数统计失败' });
+            }
+            stats.total = row.count || 0;
+
+            // 获取今日数量 (从今天零点开始)
+            db.get("SELECT COUNT(*) as count FROM upload_stats WHERE timestamp >= ?", [todayStart.toISOString()], (err, row) => {
+                if (err) {
+                    console.error("查询每日数量失败:", err.message);
+                    return res.status(500).json({ error: '获取每日统计失败' });
+                }
+                stats.daily = row.count || 0;
+
+                // 获取本周数量 (过去7天内)
+                db.get("SELECT COUNT(*) as count FROM upload_stats WHERE timestamp >= ?", [sevenDaysAgoDate.toISOString()], (err, row) => {
+                    if (err) {
+                        console.error("查询每周数量失败:", err.message);
+                        return res.status(500).json({ error: '获取每周统计失败' });
+                    }
+                    stats.weekly = row.count || 0;
+
+                    // 获取过去7天的所有上传记录以计算趋势
+                    db.all("SELECT timestamp FROM upload_stats WHERE timestamp >= ?", [sevenDaysAgoDate.toISOString()], (err, rows) => {
+                        if (err) {
+                            console.error("查询趋势数据失败:", err.message);
+                            return res.status(500).json({ error: '获取趋势数据失败' });
+                        }
+
+                        rows.forEach(row => {
+                            const timestampDate = new Date(row.timestamp);
+                            const diffTime = todayStart.getTime() - new Date(timestampDate).setHours(0, 0, 0, 0);
+                            const diffDays = Math.round(diffTime / (1000 * 60 * 60 * 24));
+
+                            // diffDays: 0是今天, 1是昨天, ..., 6是6天前
+                            if (diffDays >= 0 && diffDays < 7) {
+                                const index = 6 - diffDays; // 数组索引: 0是6天前, ..., 6是今天
+                                if (stats.dailyTrend[index] !== undefined) {
+                                    stats.dailyTrend[index]++;
+                                }
+                            }
+                        });
+
+                        res.json(stats);
+                    });
+                });
+            });
+        });
+    });
+});
+// --- 统计 API 修改结束 ---
+
 app.get('/api/github-info', async (req, res) => {
     const repoOwner = 'LanRhyme';
     const repoName = 'Web-MinecraftLogAnalyzer';
@@ -497,13 +551,10 @@ app.get('/api/github-info', async (req, res) => {
     }
 
     try {
-        // Get repo details for stars
         const repoResponse = await axios.get(`https://api.github.com/repos/${repoOwner}/${repoName}`, { headers });
         const stars = repoResponse.data.stargazers_count;
 
-        // Get latest commit date
         const commitsResponse = await axios.get(`https://api.github.com/repos/${repoOwner}/${repoName}/commits?per_page=1`, { headers });
-        // MODIFIED: Ensure lastCommitDate is the raw date string from GitHub
         const lastCommitDate = commitsResponse.data[0] ? commitsResponse.data[0].commit.author.date : null;
 
         res.json({ stars, lastCommitDate });
@@ -513,7 +564,6 @@ app.get('/api/github-info', async (req, res) => {
     }
 });
 
-// New: Check Gemini Proxy Status API
 app.get('/api/check-gemini-status', async (req, res) => {
     const target = GEMINI_PROXY_TARGET;
     if (!target) {
@@ -521,15 +571,13 @@ app.get('/api/check-gemini-status', async (req, res) => {
     }
     const startTime = Date.now();
     try {
-        // 尝试对代理目标的根或已知终端节点执行简单请求
-        // This is a basic check. A more robust check might involve hitting a specific API endpoint.
-        await axios.get(target, { timeout: 5000 }); // 5 second timeout
+        await axios.get(target, { timeout: 5000 });
         const endTime = Date.now();
         const latency = endTime - startTime;
         res.json({ status: 'ok', message: 'Gemini 代理连接正常', latency: latency });
     } catch (error) {
         const endTime = Date.now();
-        const latency = endTime - startTime; // Still calculate latency even on error
+        const latency = endTime - startTime;
         console.error('Error checking Gemini proxy status:', error.message);
         res.json({ status: 'error', message: 'Gemini 代理连接失败: ' + error.message, latency: latency });
     }

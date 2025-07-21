@@ -15,7 +15,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800&display=swap" rel="stylesheet">
 
     <style>
-        /* --- 统一的设计风格 CSS --- */
+        /* --- CSS样式保持不变 --- */
         :root {
             --bg-primary: #f8f9fa;
             --text-primary: #212529;
@@ -113,25 +113,16 @@
             min-height: 100vh;
         }
 
-        /* MODIFIED: Adopted .page-content styles from index1.html for consistent main content area */
         .page-content {
             flex-grow: 1;
             width: 100%;
             display: flex;
-            /* Added from index1.html */
             flex-direction: column;
-            /* Changed for vertical stacking of sections */
             align-items: center;
-            /* For centering the overall sections */
             padding: 2rem;
-            /* Added from index1.html */
             box-sizing: border-box;
-            /* Added from index1.html */
             max-width: 1200px;
-            /* Added from index1.html */
             margin: 0 auto;
-            /* Added from index1.html */
-            /* Removed flex-wrap here, as sections should stack vertically */
         }
 
         .mc-bg-container {
@@ -156,11 +147,8 @@
             padding: 1.5rem;
         }
 
-        /* ADDED: Hover effect for solid-card */
         .solid-card:hover {
             transform: scale(1.02);
-            /*box-shadow: var(--card-shadow-hover);*/
-            /* 可选：如果需要，添加悬停阴影变量 */
         }
 
         .header-card {
@@ -219,7 +207,6 @@
             }
         }
 
-        /* MODIFIED: Adjusted anim-card transition to match index1.html's anim-fade-in-up */
         .anim-card {
             opacity: 0;
             transform: translateY(30px);
@@ -231,7 +218,6 @@
             transform: translateY(0);
         }
 
-        /* ADDED: Pinned card animation (from index1.html) */
         .card-bounce {
             animation: cardBounce 0.3s ease-out;
         }
@@ -294,7 +280,6 @@
             text-decoration: underline;
         }
 
-        /* MODIFIED: Updated #theme-toggle to match index1.html's styling */
         #theme-toggle {
             display: flex;
             align-items: center;
@@ -304,20 +289,15 @@
             cursor: pointer;
             transition: all 0.3s ease;
             margin-left: 20px;
-            /* Added for consistent spacing */
             border-radius: 50%;
             background-color: var(--card-bg);
-            /* Added from index1.html */
             border: 1px solid var(--card-border);
-            /* Added from index1.html */
         }
 
         #theme-toggle:hover {
             transform: scale(1.1);
-            /* Added from index1.html */
         }
 
-        /* NEW: Styles for icons that should change color with theme */
         .theme-icon-color {
             color: var(--theme-toggle-icon-color);
             transition: color 0.3s ease;
@@ -491,7 +471,7 @@
         }
 
         .gemini-content ul {
-            list-style: none; /* 使用 shorthand 更可靠地移除所有列表样式 */
+            list-style: none;
             padding-left: 0;
             margin-left: 1.5rem;
             margin-bottom: 1rem;
@@ -500,20 +480,20 @@
         .gemini-content ul li {
             position: relative;
             padding-left: 1.2em;
-            line-height: 1.6; /* 确保列表项有足够的行高 */
+            line-height: 1.6;
         }
 
         .gemini-content ul li::before {
-            content: ''; /* 通过 CSS 绘制圆形，而不是依赖字符 */
+            content: '';
             display: inline-block;
-            width: 0.5em; /* 圆点直径 */
-            height: 0.5em; /* 圆点直径 */
+            width: 0.5em;
+            height: 0.5em;
             background-color: var(--text-primary);
             border-radius: 50%;
             position: absolute;
             left: 0;
-            top: 50%; /* 更通用的垂直居中方法 */
-            transform: translateY(-50%); /* 更通用的垂直居中方法 */
+            top: 50%;
+            transform: translateY(-50%);
         }
         .gemini-content ol {
             margin-left: 1.5rem;
@@ -528,7 +508,7 @@
             border-radius: 4px;
             font-size: 0.9em;
             display: inline-block;
-            vertical-align: middle; /* 调整为 middle，常用于 inline-block 元素的对齐 */
+            vertical-align: middle;
             line-height: 1.2;
             box-sizing: border-box;
         }
@@ -555,13 +535,22 @@
             color: var(--footer-link-hover);
         }
 
-        /* 新增的样式用于小卡片布局 - 始终并排显示 */
         .grid-compact {
             display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            /* Always two columns */
+            grid-template-columns: repeat(3, 1fr);
             gap: 1rem;
-            /* Adjust gap as needed */
+        }
+
+        @media (max-width: 1024px) {
+            .grid-compact {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .grid-compact {
+                grid-template-columns: 1fr;
+            }
         }
     </style>
 </head>
@@ -639,6 +628,23 @@
                         <p class="mt-1 text-xs opacity-75">Gemini 2.5 Flash</p>
                     </div>
                 </div>
+
+                <div id="usage-stats" class="solid-card anim-card hover:scale-105">
+                    <h3 class="text-lg font-semibold mb-2 flex items-center">
+                        <span class="w-7 h-7 rounded-full flex items-center justify-center mr-2 text-sm">
+                            <i class="fas fa-chart-line theme-icon-color"></i>
+                        </span>
+                        使用情况统计
+                    </h3>
+                    <div class="text-sm space-y-1">
+                        <p>总上传数: <span id="stats-total" class="font-medium">加载中...</span></p>
+                        <p>今日上传: <span id="stats-daily" class="font-medium">加载中...</span></p>
+                        <p>本周上传: <span id="stats-weekly" class="font-medium">加载中...</span></p>
+                    </div>
+                    <div class="mt-4" style="height: 80px;">
+                        <canvas id="usage-chart"></canvas>
+                    </div>
+                </div>
             </div>
         </section>
     </main>
@@ -691,9 +697,12 @@
 </div>
 
 <script>
-    // --- JavaScript 功能代码保持不变 ---
+    // --- JavaScript ---
 
-    // 右键菜单
+    let uploadChartInstance = null;
+    let statsChartInstance = null; // 新增：统计图表的实例变量
+
+    // 右键菜单 (代码不变)
     const customMenu = document.getElementById('custom-menu');
     const backItem = document.getElementById('back-item');
     const refreshItem = document.getElementById('refresh-item');
@@ -746,7 +755,7 @@
     async function pasteAction() { if (focusedElementBeforeMenu) { try { const text = await navigator.clipboard.readText(); focusedElementBeforeMenu.focus(); document.execCommand('insertText', false, text); } catch (err) { } } hideMenu(); }
     function openInNewTabAction() { if (currentTarget) window.open(currentTarget.href, '_blank'); hideMenu(); }
     function copyLinkAction() { if (currentTarget) navigator.clipboard.writeText(currentTarget.href); hideMenu(); }
-    function backToHomeAction() { window.location.href = 'https://lanrhyme.netlify.app/'; hideMenu(); } // Corrected URL
+    function backToHomeAction() { window.location.href = 'https://lanrhyme.netlify.app/'; hideMenu(); }
 
     // 主题切换
     const themeToggleBtn = document.getElementById('theme-toggle');
@@ -769,15 +778,15 @@
         setTheme(newTheme);
     });
 
-    // 更新图表颜色
-    let uploadChartInstance = null; // Declare a variable for the Chart instance
-
+    // --- 修改：更新图表颜色函数，使其也能处理新的统计图表 ---
     function updateChartColors() {
         setTimeout(() => {
             const textColor = getComputedStyle(document.documentElement).getPropertyValue('--text-primary').trim();
             const gridColor = getComputedStyle(document.documentElement).getPropertyValue('--card-border').trim();
+            const amethystColor = getComputedStyle(document.documentElement).getPropertyValue('--amethyst-color').trim();
+            const highlightBg = getComputedStyle(document.documentElement).getPropertyValue('--highlight-bg').trim();
 
-            if (uploadChartInstance) { // Check if chart instance exists
+            if (uploadChartInstance) {
                 uploadChartInstance.options.plugins.legend.labels.color = textColor;
                 if (uploadChartInstance.options.scales.y) {
                     uploadChartInstance.options.scales.y.ticks.color = textColor;
@@ -786,18 +795,23 @@
                 if (uploadChartInstance.options.scales.x) uploadChartInstance.options.scales.x.ticks.color = textColor;
                 uploadChartInstance.update();
             }
+
+            // 新增: 更新统计图表的颜色
+            if (statsChartInstance) {
+                statsChartInstance.data.datasets[0].borderColor = amethystColor;
+                statsChartInstance.data.datasets[0].backgroundColor = highlightBg;
+                statsChartInstance.data.datasets[0].pointBackgroundColor = amethystColor;
+                statsChartInstance.update();
+            }
         }, 50);
     }
 
     // DOM加载完成后初始化
     document.addEventListener('DOMContentLoaded', function () {
         loadTheme();
-
-
         fetchGitHubInfo();
         checkAiStatus();
-
-
+        fetchUsageStats();
     });
 
     // 卡片入场动画
@@ -812,7 +826,7 @@
     function showWarningPopup(keyword, description) { document.getElementById('warningKeyword').innerText = keyword; document.getElementById('warningDescription').innerText = description; document.getElementById('warningPopup').classList.remove('hidden'); }
     function hideWarningPopup() { document.getElementById('warningPopup').classList.add('hidden'); }
 
-    // 获取 GitHub 项目信息
+    // 获取 GitHub 项目信息 (代码不变)
     async function fetchGitHubInfo() {
         try {
             const response = await fetch('/api/github-info');
@@ -824,7 +838,6 @@
                 return;
             }
             document.getElementById('github-stars').innerText = data.stars || 'N/A';
-            // MODIFIED: Use toLocaleString for more precise date and time
             document.getElementById('github-commit').innerText = data.lastCommitDate ? new Date(data.lastCommitDate).toLocaleString() : 'N/A';
         } catch (error) {
             document.getElementById('github-stars').innerText = 'N/A';
@@ -833,41 +846,127 @@
         }
     }
 
-    // 检查 AI 代理状态
+    // 检查 AI 代理状态 (代码不变)
     async function checkAiStatus() {
         const geminiStatusElem = document.getElementById('gemini-status');
-        const geminiLatencyElem = document.getElementById('gemini-latency'); // NEW: Get latency element
+        const geminiLatencyElem = document.getElementById('gemini-latency');
         geminiStatusElem.innerText = '检测中...';
-        geminiLatencyElem.innerText = '检测中...'; // Initialize latency display
+        geminiLatencyElem.innerText = '检测中...';
         try {
-            const startTime = Date.now(); // Record start time
+            const startTime = Date.now();
             const response = await fetch('/api/check-gemini-status');
-            const endTime = Date.now(); // Record end time
-            const latency = endTime - startTime; // Calculate latency
+            const endTime = Date.now();
+            const latency = endTime - startTime;
 
             const data = await response.json();
             if (data.status === 'ok') {
                 geminiStatusElem.innerText = '在线';
                 geminiStatusElem.style.color = 'var(--amethyst-color)';
-                geminiLatencyElem.innerText = `${latency}ms`; // Display latency
+                geminiLatencyElem.innerText = `${latency}ms`;
                 geminiLatencyElem.style.color = 'var(--amethyst-color)';
             } else {
                 geminiStatusElem.innerText = '离线 / 错误';
                 geminiStatusElem.style.color = 'var(--text-red-700)';
-                geminiLatencyElem.innerText = `N/A`; // No latency if offline/error
+                geminiLatencyElem.innerText = `N/A`;
                 geminiLatencyElem.style.color = 'var(--text-red-700)';
                 console.warn('Gemini AI 状态检测失败:', data.message);
             }
         } catch (error) {
             geminiStatusElem.innerText = '无法连接';
             geminiStatusElem.style.color = 'var(--text-red-700)';
-            geminiLatencyElem.innerText = `N/A`; // No latency if connection fails
+            geminiLatencyElem.innerText = `N/A`;
             geminiLatencyElem.style.color = 'var(--text-red-700)';
             console.error('检查 Gemini AI 状态异常:', error);
         }
     }
 
-    // 日志上传与分析
+    // --- 新增：创建或更新统计图表的函数 ---
+    function createOrUpdateStatsChart(trendData) {
+        const ctx = document.getElementById('usage-chart').getContext('2d');
+        const labels = ['6天前', '5天前', '4天前', '3天前', '昨天', '前天', '今天'];
+
+        const amethystColor = getComputedStyle(document.documentElement).getPropertyValue('--amethyst-color').trim();
+        const highlightBg = getComputedStyle(document.documentElement).getPropertyValue('--highlight-bg').trim();
+
+        if (statsChartInstance) {
+            statsChartInstance.destroy(); // 销毁旧图表实例
+        }
+
+        statsChartInstance = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: '每日上传数量',
+                    data: trendData,
+                    borderColor: amethystColor,
+                    backgroundColor: highlightBg,
+                    fill: true,
+                    tension: 0.4, // 使线条平滑
+                    pointRadius: 0, // 隐藏数据点
+                    pointHoverRadius: 4,
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false // 隐藏图例
+                    },
+                    tooltip: {
+                        mode: 'index',
+                        intersect: false,
+                    }
+                },
+                scales: {
+                    x: {
+                        display: false // 隐藏X轴
+                    },
+                    y: {
+                        display: false, // 隐藏Y轴
+                        beginAtZero: true
+                    }
+                },
+                interaction: {
+                    mode: 'nearest',
+                    axis: 'x',
+                    intersect: false
+                }
+            }
+        });
+    }
+
+    // --- 修改：获取统计数据的函数，增加图表渲染逻辑 ---
+    async function fetchUsageStats() {
+        const totalElem = document.getElementById('stats-total');
+        const dailyElem = document.getElementById('stats-daily');
+        const weeklyElem = document.getElementById('stats-weekly');
+        try {
+            const response = await fetch('/api/stats');
+            if (!response.ok) {
+                throw new Error(`HTTP 错误! 状态: ${response.status}`);
+            }
+            const data = await response.json();
+            if (data.error) {
+                throw new Error(data.error);
+            }
+            totalElem.innerText = data.total;
+            dailyElem.innerText = data.daily;
+            weeklyElem.innerText = data.weekly;
+
+            // 使用获取到的数据渲染图表
+            createOrUpdateStatsChart(data.dailyTrend);
+
+        } catch (error) {
+            totalElem.innerText = 'N/A';
+            dailyElem.innerText = 'N/A';
+            weeklyElem.innerText = 'N/A';
+            console.error('获取使用情况统计失败:', error);
+        }
+    }
+
+    // 日志上传与分析 (代码不变, 仅在成功后调用 fetchUsageStats)
     document.getElementById('uploadBtn').onclick = async function () {
         const fileInput = document.getElementById('logFile');
         const file = fileInput.files[0];
@@ -878,6 +977,10 @@
         resultDiv.innerHTML = `<div class="solid-card text-center p-4" style="color: var(--text-primary);">分析中，请稍候...</div>`;
         try {
             const res1 = await fetch('/api/extract', { method: 'POST', body: formData });
+
+            // 上传成功后，立即刷新统计数据和图表
+            fetchUsageStats();
+
             const data1 = await res1.json();
             if (data1.error) { resultDiv.innerHTML = `<div class="solid-card text-red-700 p-4">${data1.error}</div>`; return; }
             if (data1.info.keyword) { showWarningPopup(data1.info.keyword, "由开发者添加，这可能是导致游戏崩溃的主要原因，一般来说是模组文件，请检查你的mod列表"); }
@@ -888,7 +991,6 @@
             for (const key in data1.info) { if (Object.prototype.hasOwnProperty.call(data1.info, key)) { infoHtml += `<li><strong>${infoDisplayMap[key] || key}：</strong>${data1.info[key]}</li>`; } }
             infoHtml += '</ul></div>';
 
-            // Add Quick Analysis Card here
             infoHtml += `<div id="quickAnalysisCard" class="result-card anim-card mt-6">
                 <h3 class="text-lg font-bold">快速分析结果(来自PCL2数据)</h3><hr class="my-3" style="border-color: var(--card-border);">
                 <div class="quick-analysis-content text-left" style="word-wrap: break-word;">${marked.parse(data1.quickAnalysis)}</div>
@@ -896,20 +998,17 @@
 
             resultDiv.innerHTML = infoHtml;
             setTimeout(() => { document.querySelector('#analysisResult #basicInfoCard').classList.add('active'); }, 50);
-            setTimeout(() => { document.querySelector('#quickAnalysisCard').classList.add('active'); }, 150); // Delay for quick analysis card
+            setTimeout(() => { document.querySelector('#quickAnalysisCard').classList.add('active'); }, 150);
 
             resultDiv.innerHTML += `<div id="geminiCard" class="result-card anim-card mt-6">
                     <h3 class="text-lg font-bold">AI 分析结果 (Gemini 2.5 Flash)</h3><hr class="my-3" style="border-color: var(--card-border);">
                     <div class="gemini-content text-left" style="word-wrap: break-word;">分析中，请稍候...</div></div>`;
             setTimeout(() => { document.querySelector('#geminiCard').classList.add('active'); }, 250);
 
-            // Placeholder for buttons
             const buttonsContainer = document.createElement('div');
-            buttonsContainer.className = 'mt-4 flex space-x-4 justify-end'; // Add spacing and justify end
+            buttonsContainer.className = 'mt-4 flex space-x-4 justify-end';
             document.querySelector('#geminiCard').appendChild(buttonsContainer);
 
-
-            // Copy button
             let copyBtn = document.createElement('button');
             copyBtn.innerText = '复制分析内容';
             copyBtn.className = 'px-4 py-2 amethyst-dark-button';
@@ -923,7 +1022,6 @@
             };
             buttonsContainer.appendChild(copyBtn);
 
-            // Save as Image button
             let saveImageBtn = document.createElement('button');
             saveImageBtn.innerText = '保存为图片';
             saveImageBtn.className = 'px-4 py-2 amethyst-dark-button';
@@ -932,10 +1030,9 @@
                 saveImageBtn.disabled = true;
 
                 const analysisResultElement = document.getElementById('analysisResult');
-                const mainPageContent = document.querySelector('main.page-content'); // 获取 main 元素
-                const analysisSection = analysisResultElement.closest('section'); // 获取 analysisResult 的父级 section 元素
+                const mainPageContent = document.querySelector('main.page-content');
+                const analysisSection = analysisResultElement.closest('section');
 
-                // 存储原始样式，以便在捕获后恢复
                 const originalMainMaxWidth = mainPageContent.style.maxWidth;
                 const originalAnalysisSectionMaxWidth = analysisSection.style.maxWidth;
                 const originalAnalysisResultMaxWidth = analysisResultElement.style.maxWidth;
@@ -943,35 +1040,31 @@
                 const originalAnalysisResultPadding = analysisResultElement.style.padding;
                 const originalAnalysisResultBoxSizing = analysisResultElement.style.boxSizing;
 
-                // 暂时调整父级和目标元素的样式，以确保 html2canvas 捕获到完整宽度
-                mainPageContent.style.maxWidth = 'none'; // 允许主内容区域宽度不受限制
-                analysisSection.style.maxWidth = 'none'; // 允许 section 宽度不受限制
-                analysisResultElement.style.maxWidth = '1300px'; // 设置期望的捕获宽度
-                analysisResultElement.style.margin = '0 auto'; // 居中显示，如果宽度小于视口
-                analysisResultElement.style.padding = '2rem'; // 恢复或设置内边距
-                analysisResultElement.style.boxSizing = 'border-box'; // 确保内边距被正确计算
+                mainPageContent.style.maxWidth = 'none';
+                analysisSection.style.maxWidth = 'none';
+                analysisResultElement.style.maxWidth = '1300px';
+                analysisResultElement.style.margin = '0 auto';
+                analysisResultElement.style.padding = '2rem';
+                analysisResultElement.style.boxSizing = 'border-box';
 
-                // 调整内部卡片的宽度
                 const cardsToCapture = analysisResultElement.querySelectorAll('.result-card');
                 const originalCardWidths = [];
                 cardsToCapture.forEach(card => {
                     originalCardWidths.push(card.style.width);
-                    card.style.width = '100%'; // 确保卡片占据其父容器的全部宽度
+                    card.style.width = '100%';
                 });
 
-                // 获取当前主题背景色
                 const isDarkMode = document.documentElement.classList.contains('dark-mode');
                 const backgroundColor = getComputedStyle(document.body).getPropertyValue('--bg-primary').trim();
 
                 try {
                     const canvas = await html2canvas(analysisResultElement, {
-                        scale: 2, // 以更高分辨率捕获，提升图片质量
-                        useCORS: true, // 如果包含跨域图片，则启用此选项
-                        backgroundColor: backgroundColor, // 使用当前背景色
-                        width: 1300, // 明确设置捕获区域的宽度
-                        windowWidth: 1300, // 设置虚拟窗口宽度，用于渲染
+                        scale: 2,
+                        useCORS: true,
+                        backgroundColor: backgroundColor,
+                        width: 1300,
+                        windowWidth: 1300,
                         ignoreElements: (element) => {
-                            // 排除按钮，不将其包含在截图中
                             return element === copyBtn || element === saveImageBtn;
                         }
                     });
@@ -995,11 +1088,10 @@
                     alert('保存图片失败，请稍后再试');
                     saveImageBtn.innerText = '保存失败';
                     setTimeout(() => {
-                        saveImageBtn.innerText = '保存为图片';
+                        saveImage.innerText = '保存为图片';
                         saveImageBtn.disabled = false;
                     }, 2000);
                 } finally {
-                    // 恢复所有被临时修改的原始样式
                     mainPageContent.style.maxWidth = originalMainMaxWidth;
                     analysisSection.style.maxWidth = originalAnalysisSectionMaxWidth;
                     analysisResultElement.style.maxWidth = originalAnalysisResultMaxWidth;

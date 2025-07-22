@@ -487,7 +487,7 @@ app.get('/api/stats', (req, res) => {
 
         // 2. 获取今日数量 (使用 'localtime' 修饰符，与本地时间存储的timestamp保持一致)
         // 假设 timestamp 已经存储为本地时间
-        db.get(`SELECT COUNT(*) as count FROM upload_stats WHERE timestamp >= DATE('now', 'start of day', 'localtime')`, [], (err, row) => {
+        db.get(`SELECT COUNT(*) as count FROM upload_stats WHERE timestamp >= DATE('now', 'start of day')`, [], (err, row) => {
             if (err) {
                 console.error("查询每日数量失败:", err.message);
                 return res.status(500).json({ error: '获取每日统计失败' });
@@ -497,7 +497,7 @@ app.get('/api/stats', (req, res) => {
 
         // 3. 获取本周数量 (使用 'localtime' 修饰符)
         // 假设 timestamp 已经存储为本地时间
-        db.get(`SELECT COUNT(*) as count FROM upload_stats WHERE timestamp >= DATE('now', '-7 days', 'localtime')`, [], (err, row) => {
+        db.get(`SELECT COUNT(*) as count FROM upload_stats WHERE timestamp >= DATE('now', '-7 days')`, [], (err, row) => {
             if (err) {
                 console.error("查询每周数量失败:", err.message);
                 return res.status(500).json({ error: '获取每周统计失败' });
@@ -509,10 +509,10 @@ app.get('/api/stats', (req, res) => {
         // 假设 timestamp 已经存储为本地时间
         const trendQuery = `
             SELECT
-                DATE(timestamp, 'localtime') as upload_day, -- 如果 timestamp 已经是本地时间，直接使用 DATE(timestamp) 也可以
+                DATE(timestamp) as upload_day,
                 COUNT(*) as count
             FROM upload_stats
-            WHERE timestamp >= DATE('now', '-6 days', 'localtime')
+            WHERE timestamp >= DATE('now', '-6 days') 
             GROUP BY upload_day;
         `;
         db.all(trendQuery, [], (err, rows) => {

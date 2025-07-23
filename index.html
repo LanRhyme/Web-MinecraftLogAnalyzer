@@ -15,7 +15,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800&display=swap" rel="stylesheet">
 
     <style>
-        /* --- CSS样式保持不变 --- */
+        /* --- CSS styles remain unchanged --- */
         :root {
             --bg-primary: #f8f9fa;
             --text-primary: #212529;
@@ -700,9 +700,9 @@
     // --- JavaScript ---
 
     let uploadChartInstance = null;
-    let statsChartInstance = null; // 新增：统计图表的实例变量
+    let statsChartInstance = null;
 
-    // 右键菜单 (代码不变)
+    // Right-click menu (unchanged)
     const customMenu = document.getElementById('custom-menu');
     const backItem = document.getElementById('back-item');
     const refreshItem = document.getElementById('refresh-item');
@@ -757,7 +757,7 @@
     function copyLinkAction() { if (currentTarget) navigator.clipboard.writeText(currentTarget.href); hideMenu(); }
     function backToHomeAction() { window.location.href = 'https://lanrhyme.netlify.app/'; hideMenu(); }
 
-    // 主题切换
+    // Theme toggle (unchanged)
     const themeToggleBtn = document.getElementById('theme-toggle');
     const themeToggleIcon = themeToggleBtn.querySelector('i');
     function setTheme(theme) {
@@ -778,7 +778,6 @@
         setTheme(newTheme);
     });
 
-    // --- 修改：更新图表颜色函数，使其也能处理新的统计图表 ---
     function updateChartColors() {
         setTimeout(() => {
             const textColor = getComputedStyle(document.documentElement).getPropertyValue('--text-primary').trim();
@@ -786,17 +785,6 @@
             const amethystColor = getComputedStyle(document.documentElement).getPropertyValue('--amethyst-color').trim();
             const highlightBg = getComputedStyle(document.documentElement).getPropertyValue('--highlight-bg').trim();
 
-            if (uploadChartInstance) {
-                uploadChartInstance.options.plugins.legend.labels.color = textColor;
-                if (uploadChartInstance.options.scales.y) {
-                    uploadChartInstance.options.scales.y.ticks.color = textColor;
-                    uploadChartInstance.options.scales.y.grid.color = gridColor;
-                }
-                if (uploadChartInstance.options.scales.x) uploadChartInstance.options.scales.x.ticks.color = textColor;
-                uploadChartInstance.update();
-            }
-
-            // 新增: 更新统计图表的颜色
             if (statsChartInstance) {
                 statsChartInstance.data.datasets[0].borderColor = amethystColor;
                 statsChartInstance.data.datasets[0].backgroundColor = highlightBg;
@@ -806,7 +794,7 @@
         }, 50);
     }
 
-    // DOM加载完成后初始化
+    // DOM Ready Initializations
     document.addEventListener('DOMContentLoaded', function () {
         loadTheme();
         fetchGitHubInfo();
@@ -814,7 +802,7 @@
         fetchUsageStats();
     });
 
-    // 卡片入场动画
+    // Card Animation (unchanged)
     document.addEventListener("DOMContentLoaded", function () {
         const cards = document.querySelectorAll(".anim-card");
         function checkVisibility() { cards.forEach(card => { const rect = card.getBoundingClientRect(); if (rect.top < window.innerHeight && rect.bottom >= 0 && !card.classList.contains('active')) { card.classList.add('active'); } }); }
@@ -822,11 +810,11 @@
         window.addEventListener("scroll", checkVisibility);
     });
 
-    // 警告弹窗
+    // Warning Popup (unchanged)
     function showWarningPopup(keyword, description) { document.getElementById('warningKeyword').innerText = keyword; document.getElementById('warningDescription').innerText = description; document.getElementById('warningPopup').classList.remove('hidden'); }
     function hideWarningPopup() { document.getElementById('warningPopup').classList.add('hidden'); }
 
-    // 获取 GitHub 项目信息 (代码不变)
+    // GitHub Info Fetching (unchanged)
     async function fetchGitHubInfo() {
         try {
             const response = await fetch('/api/github-info');
@@ -846,7 +834,7 @@
         }
     }
 
-    // 检查 AI 代理状态 (代码不变)
+    // AI Status Check (unchanged)
     async function checkAiStatus() {
         const geminiStatusElem = document.getElementById('gemini-status');
         const geminiLatencyElem = document.getElementById('gemini-latency');
@@ -880,18 +868,16 @@
         }
     }
 
-    // --- 新增：创建或更新统计图表的函数 ---
+    // Stats Chart (unchanged)
     function createOrUpdateStatsChart(trendData) {
         const ctx = document.getElementById('usage-chart').getContext('2d');
         const labels = ['6天前', '5天前', '4天前', '3天前', '昨天', '前天', '今天'];
-
         const amethystColor = getComputedStyle(document.documentElement).getPropertyValue('--amethyst-color').trim();
         const highlightBg = getComputedStyle(document.documentElement).getPropertyValue('--highlight-bg').trim();
 
         if (statsChartInstance) {
-            statsChartInstance.destroy(); // 销毁旧图表实例
+            statsChartInstance.destroy();
         }
-
         statsChartInstance = new Chart(ctx, {
             type: 'line',
             data: {
@@ -902,62 +888,34 @@
                     borderColor: amethystColor,
                     backgroundColor: highlightBg,
                     fill: true,
-                    tension: 0.4, // 使线条平滑
-                    pointRadius: 0, // 隐藏数据点
+                    tension: 0.4,
+                    pointRadius: 0,
                     pointHoverRadius: 4,
                 }]
             },
             options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: {
-                        display: false // 隐藏图例
-                    },
-                    tooltip: {
-                        mode: 'index',
-                        intersect: false,
-                    }
-                },
-                scales: {
-                    x: {
-                        display: false // 隐藏X轴
-                    },
-                    y: {
-                        display: false, // 隐藏Y轴
-                        beginAtZero: true
-                    }
-                },
-                interaction: {
-                    mode: 'nearest',
-                    axis: 'x',
-                    intersect: false
-                }
+                responsive: true, maintainAspectRatio: false,
+                plugins: { legend: { display: false }, tooltip: { mode: 'index', intersect: false, } },
+                scales: { x: { display: false }, y: { display: false, beginAtZero: true } },
+                interaction: { mode: 'nearest', axis: 'x', intersect: false }
             }
         });
     }
 
-    // --- 修改：获取统计数据的函数，增加图表渲染逻辑 ---
+    // Stats Fetching (unchanged)
     async function fetchUsageStats() {
         const totalElem = document.getElementById('stats-total');
         const dailyElem = document.getElementById('stats-daily');
         const weeklyElem = document.getElementById('stats-weekly');
         try {
             const response = await fetch('/api/stats');
-            if (!response.ok) {
-                throw new Error(`HTTP 错误! 状态: ${response.status}`);
-            }
+            if (!response.ok) throw new Error(`HTTP 错误! 状态: ${response.status}`);
             const data = await response.json();
-            if (data.error) {
-                throw new Error(data.error);
-            }
+            if (data.error) throw new Error(data.error);
             totalElem.innerText = data.total;
             dailyElem.innerText = data.daily;
             weeklyElem.innerText = data.weekly;
-
-            // 使用获取到的数据渲染图表
             createOrUpdateStatsChart(data.dailyTrend);
-
         } catch (error) {
             totalElem.innerText = 'N/A';
             dailyElem.innerText = 'N/A';
@@ -966,45 +924,72 @@
         }
     }
 
-    // 日志上传与分析 (代码不变, 仅在成功后调用 fetchUsageStats)
+    // --- MODIFIED: Log upload and analysis now uses a single API call ---
     document.getElementById('uploadBtn').onclick = async function () {
         const fileInput = document.getElementById('logFile');
         const file = fileInput.files[0];
-        if (!file) { alert('请选择日志文件'); return; }
+        if (!file) {
+            alert('请选择日志文件');
+            return;
+        }
         const formData = new FormData();
         formData.append('file', file);
         const resultDiv = document.getElementById('analysisResult');
-        resultDiv.innerHTML = `<div class="solid-card text-center p-4" style="color: var(--text-primary);">分析中，请稍候...</div>`;
+        resultDiv.innerHTML = `<div class="solid-card text-center p-4" style="color: var(--text-primary);">正在分析中，请稍候...</div>`;
+
         try {
-            const res1 = await fetch('/api/extract', { method: 'POST', body: formData });
+            const response = await fetch('/api/extract', {
+                method: 'POST',
+                body: formData
+            });
 
-            // 上传成功后，立即刷新统计数据和图表
-            fetchUsageStats();
+            fetchUsageStats(); // Refresh stats after every upload attempt
 
-            const data1 = await res1.json();
-            if (data1.error) { resultDiv.innerHTML = `<div class="solid-card text-red-700 p-4">${data1.error}</div>`; return; }
-            if (data1.info.keyword) { showWarningPopup(data1.info.keyword, "由开发者添加，这可能是导致游戏崩溃的主要原因，一般来说是模组文件，请检查你的mod列表"); }
-            const infoDisplayMap = { launcher_name: '启动器', device: '设备', os: '操作系统', launcher_version: '启动器版本', commit: '提交版本号', java_version: 'Java 版本', renderer: '渲染器', minecraft_version: '游戏版本', keyword: '可能导致崩溃的关键词' };
-            let infoHtml = `<div id="basicInfoCard" class="result-card anim-card">
-                    <h3 class="text-lg font-bold">基础信息提取</h3><hr class="my-3" style="border-color: var(--card-border);">
+            const data = await response.json();
+
+            if (data.error) {
+                resultDiv.innerHTML = `<div class="solid-card text-red-700 p-4">${data.error}</div>`;
+                return;
+            }
+
+            // Handle Popups for rate limiting or custom keywords
+            if (data.rateLimited) {
+                showWarningPopup('请求次数过多', '您在短时间内请求次数过多，AI分析已被暂时跳过，请稍后重试');
+            } else if (data.info.keyword) {
+                showWarningPopup(data.info.keyword, "由开发者添加，这可能是导致游戏崩溃的主要原因，一般来说是模组文件，请检查你的mod列表");
+            }
+
+            const cacheNotification = data.isCached ? `<span class="text-xs ml-4 p-1 rounded" style="background-color: var(--highlight-bg); color: var(--amethyst-color);">从缓存加载</span>` : '';
+
+            const infoDisplayMap = {
+                launcher_name: '启动器', device: '设备', os: '操作系统', launcher_version: '启动器版本', commit: '提交版本号', java_version: 'Java 版本', renderer: '渲染器', minecraft_version: '游戏版本', keyword: '可能导致崩溃的关键词'
+            };
+
+            let resultHTML = `<div id="basicInfoCard" class="result-card anim-card">
+                    <h3 class="text-lg font-bold">基础信息提取 ${cacheNotification}</h3><hr class="my-3" style="border-color: var(--card-border);">
                     <ul class="list-disc list-inside text-left space-y-1">`;
-            for (const key in data1.info) { if (Object.prototype.hasOwnProperty.call(data1.info, key)) { infoHtml += `<li><strong>${infoDisplayMap[key] || key}：</strong>${data1.info[key]}</li>`; } }
-            infoHtml += '</ul></div>';
+            for (const key in data.info) {
+                if (Object.prototype.hasOwnProperty.call(data.info, key)) {
+                    resultHTML += `<li><strong>${infoDisplayMap[key] || key}：</strong>${data.info[key]}</li>`;
+                }
+            }
+            resultHTML += `</ul></div>`;
 
-            infoHtml += `<div id="quickAnalysisCard" class="result-card anim-card mt-6">
-                <h3 class="text-lg font-bold">快速分析结果(来自PCL2数据)</h3><hr class="my-3" style="border-color: var(--card-border);">
-                <div class="quick-analysis-content text-left" style="word-wrap: break-word;">${marked.parse(data1.quickAnalysis)}</div>
+            resultHTML += `<div id="quickAnalysisCard" class="result-card anim-card mt-6">
+                <h3 class="text-lg font-bold">快速分析结果<span class="text-xs ml-4 p-1 rounded" style="background-color: var(--highlight-bg); color: var(--amethyst-color);">来自PCL2数据</span></h3><hr class="my-3" style="border-color: var(--card-border);">
+                <div class="quick-analysis-content text-left" style="word-wrap: break-word;">${marked.parse(data.quickAnalysis)}</div>
             </div>`;
 
-            resultDiv.innerHTML = infoHtml;
+            resultHTML += `<div id="geminiCard" class="result-card anim-card mt-6">
+                    <h3 class="text-lg font-bold">AI 分析结果<span class="text-xs ml-4 p-1 rounded" style="background-color: var(--highlight-bg); color: var(--amethyst-color);">Gemini 2.5 Flash</span></h3><hr class="my-3" style="border-color: var(--card-border);">
+                    <div class="gemini-content text-left" style="word-wrap: break-word;">${marked.parse(data.gemini)}</div></div>`;
+
+            resultDiv.innerHTML = resultHTML;
             setTimeout(() => { document.querySelector('#analysisResult #basicInfoCard').classList.add('active'); }, 50);
             setTimeout(() => { document.querySelector('#quickAnalysisCard').classList.add('active'); }, 150);
-
-            resultDiv.innerHTML += `<div id="geminiCard" class="result-card anim-card mt-6">
-                    <h3 class="text-lg font-bold">AI 分析结果 (Gemini 2.5 Flash)</h3><hr class="my-3" style="border-color: var(--card-border);">
-                    <div class="gemini-content text-left" style="word-wrap: break-word;">分析中，请稍候...</div></div>`;
             setTimeout(() => { document.querySelector('#geminiCard').classList.add('active'); }, 250);
 
+            // Add action buttons
             const buttonsContainer = document.createElement('div');
             buttonsContainer.className = 'mt-4 flex space-x-4 justify-end';
             document.querySelector('#geminiCard').appendChild(buttonsContainer);
@@ -1028,93 +1013,29 @@
             saveImageBtn.onclick = async function () {
                 saveImageBtn.innerText = '生成中...';
                 saveImageBtn.disabled = true;
-
-                const analysisResultElement = document.getElementById('analysisResult');
-                const mainPageContent = document.querySelector('main.page-content');
-                const analysisSection = analysisResultElement.closest('section');
-
-                const originalMainMaxWidth = mainPageContent.style.maxWidth;
-                const originalAnalysisSectionMaxWidth = analysisSection.style.maxWidth;
-                const originalAnalysisResultMaxWidth = analysisResultElement.style.maxWidth;
-                const originalAnalysisResultMargin = analysisResultElement.style.margin;
-                const originalAnalysisResultPadding = analysisResultElement.style.padding;
-                const originalAnalysisResultBoxSizing = analysisResultElement.style.boxSizing;
-
-                mainPageContent.style.maxWidth = 'none';
-                analysisSection.style.maxWidth = 'none';
-                analysisResultElement.style.maxWidth = '1300px';
-                analysisResultElement.style.margin = '0 auto';
-                analysisResultElement.style.padding = '2rem';
-                analysisResultElement.style.boxSizing = 'border-box';
-
-                const cardsToCapture = analysisResultElement.querySelectorAll('.result-card');
-                const originalCardWidths = [];
-                cardsToCapture.forEach(card => {
-                    originalCardWidths.push(card.style.width);
-                    card.style.width = '100%';
-                });
-
-                const isDarkMode = document.documentElement.classList.contains('dark-mode');
-                const backgroundColor = getComputedStyle(document.body).getPropertyValue('--bg-primary').trim();
-
+                const elementToCapture = document.getElementById('analysisResult');
                 try {
-                    const canvas = await html2canvas(analysisResultElement, {
-                        scale: 2,
-                        useCORS: true,
-                        backgroundColor: backgroundColor,
-                        width: 1300,
-                        windowWidth: 1300,
-                        ignoreElements: (element) => {
-                            return element === copyBtn || element === saveImageBtn;
-                        }
-                    });
-
-                    const imgData = canvas.toDataURL('image/png');
+                    const canvas = await html2canvas(elementToCapture, { scale: 2, useCORS: true, backgroundColor: getComputedStyle(document.body).getPropertyValue('--bg-primary').trim() });
                     const link = document.createElement('a');
-                    link.href = imgData;
+                    link.href = canvas.toDataURL('image/png');
                     link.download = 'MinecraftLogAnalysisResult.png';
-                    document.body.appendChild(link);
                     link.click();
-                    document.body.removeChild(link);
-
                     saveImageBtn.innerText = '保存成功！';
+                } catch (err) {
+                    console.error('保存图片失败:', err);
+                    saveImageBtn.innerText = '保存失败';
+                } finally {
                     setTimeout(() => {
                         saveImageBtn.innerText = '保存为图片';
                         saveImageBtn.disabled = false;
                     }, 2000);
-
-                } catch (err) {
-                    console.error('保存图片失败:', err);
-                    alert('保存图片失败，请稍后再试');
-                    saveImageBtn.innerText = '保存失败';
-                    setTimeout(() => {
-                        saveImage.innerText = '保存为图片';
-                        saveImageBtn.disabled = false;
-                    }, 2000);
-                } finally {
-                    mainPageContent.style.maxWidth = originalMainMaxWidth;
-                    analysisSection.style.maxWidth = originalAnalysisSectionMaxWidth;
-                    analysisResultElement.style.maxWidth = originalAnalysisResultMaxWidth;
-                    analysisResultElement.style.margin = originalAnalysisResultMargin;
-                    analysisResultElement.style.padding = originalAnalysisResultPadding;
-                    analysisResultElement.style.boxSizing = originalAnalysisResultBoxSizing;
-                    cardsToCapture.forEach((card, index) => {
-                        card.style.width = originalCardWidths[index];
-                    });
                 }
             };
             buttonsContainer.appendChild(saveImageBtn);
 
-
-            fetch('/api/gemini', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ log: data1.log }) })
-                .then(res2 => res2.json())
-                .then(data2 => {
-                    const aiDiv = document.querySelector('#geminiCard .gemini-content');
-                    if (data2.gemini) { aiDiv.innerHTML = marked.parse(data2.gemini); }
-                    else { aiDiv.innerText = 'AI未返回有效分析结果'; }
-
-                }).catch(e => { document.querySelector('#geminiCard .gemini-content').innerText = 'AI分析失败：' + e.message; });
-        } catch (e) { resultDiv.innerHTML = `<div class="solid-card text-red-700 p-4">分析失败：${e.message}</div>`; }
+        } catch (e) {
+            resultDiv.innerHTML = `<div class="solid-card text-red-700 p-4">分析失败：${e.message}</div>`;
+        }
     };
 </script>
 </body>

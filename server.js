@@ -6,12 +6,14 @@ const fs = require('fs');
 const axios = require('axios');
 const path = require('path');
 const sqlite3 = require('sqlite3').verbose();
+const crypto =require('crypto');
 
 const app = express();
 const upload = multer({ dest: 'uploads/' });
 
 app.use(cors());
 app.use(express.json({ limit: '8mb' }));
+app.set('trust proxy', 1); // Important for getting the correct client IP behind a proxy
 
 const PORT = process.env.PORT || 3000;
 
@@ -33,6 +35,51 @@ const GITHUB_TOKEN = process.env.GITHUB_TOKEN || '';
 console.log('Gemini Key:', GEMINI_API_KEY ? '已设置' : '未设置');
 console.log('Custom Keywords (from .env):', CUSTOM_KEYWORDS_ENV || '未设置');
 console.log('GitHub Token:', GITHUB_TOKEN ? '已设置' : '未设置');
+
+// --- New Feature: Rate Limiting & Caching ---
+const RATE_LIMIT_WINDOW_MS = 1 * 60 * 1000; // 2 minute
+const MAX_REQUESTS_PER_WINDOW = 1; // 1 requests per minute
+const CACHE_TTL_MS = 30 * 60 * 1000; // 30 minutes
+
+const requestTracker = new Map();
+const analysisCache = new Map();
+
+// Middleware for rate limiting
+const rateLimiter = (req, res, next) => {
+    const ip = req.ip;
+    const now = Date.now();
+
+    const requests = requestTracker.get(ip) || [];
+    const recentRequests = requests.filter(timestamp => now - timestamp < RATE_LIMIT_WINDOW_MS);
+
+    if (recentRequests.length >= MAX_REQUESTS_PER_WINDOW) {
+        req.rateLimited = true;
+    }
+
+    recentRequests.push(now);
+    requestTracker.set(ip, recentRequests);
+
+    next();
+};
+
+// Periodically clean up old entries to prevent memory leaks
+setInterval(() => {
+    const now = Date.now();
+    for (const [ip, timestamps] of requestTracker.entries()) {
+        const validTimestamps = timestamps.filter(ts => now - ts < RATE_LIMIT_WINDOW_MS);
+        if (validTimestamps.length > 0) {
+            requestTracker.set(ip, validTimestamps);
+        } else {
+            requestTracker.delete(ip);
+        }
+    }
+    for (const [hash, data] of analysisCache.entries()) {
+        if (now - data.timestamp > CACHE_TTL_MS) {
+            analysisCache.delete(hash);
+        }
+    }
+    console.log(`Cleanup complete. Tracked IPs: ${requestTracker.size}, Cached items: ${analysisCache.size}`);
+}, 10 * 60 * 1000); // Run cleanup every 10 minutes
 
 app.use(express.static(__dirname));
 
@@ -424,59 +471,78 @@ function quickAnalysis(log) {
 }
 
 
-app.post('/api/gemini', async (req, res) => {
-    try {
-        if (!req.body.log) {
-            return res.status(400).json({ error: '缺少日志内容' });
-        }
-        const geminiResult = await callGemini(req.body.log);
-        res.json({ gemini: geminiResult });
-    } catch (error) {
-        console.error('API /api/gemini 发生错误:', error);
-        res.status(500).json({ error: 'AI分析服务器处理失败: ' + error.message });
-    }
-});
+// REMOVED old /api/gemini endpoint, its logic is now inside /api/extract
 
-app.post('/api/extract', upload.single('file'), async (req, res) => {
+// --- MODIFIED: /api/extract now handles rate limiting, caching, and Gemini calls ---
+app.post('/api/extract', upload.single('file'), rateLimiter, async (req, res) => {
     try {
         if (!req.file) {
             return res.status(400).json({ error: '未上传文件' });
         }
         const log = fs.readFileSync(req.file.path, 'utf-8');
-        fs.unlinkSync(req.file.path);
+        fs.unlinkSync(req.file.path); // Clean up uploaded file immediately
+
+        const logHash = crypto.createHash('sha256').update(log).digest('hex');
+
+        // 1. Check cache first
+        const cachedResult = analysisCache.get(logHash);
+        if (cachedResult && (Date.now() - cachedResult.timestamp < CACHE_TTL_MS)) {
+            console.log(`[Cache] HIT for hash: ${logHash.substring(0, 10)}...`);
+            return res.json({ ...cachedResult, isCached: true });
+        }
+        console.log(`[Cache] MISS for hash: ${logHash.substring(0, 10)}...`);
 
         db.run('INSERT INTO upload_stats DEFAULT VALUES', (err) => {
-            if (err) {
-                console.error('记录上传数据失败:', err.message);
-            }
+            if (err) console.error('记录上传数据失败:', err.message);
         });
 
         const info = extractInfo(log);
         const quickAnalysisResult = quickAnalysis(log);
+        let geminiResult = '';
 
-        res.json({
+        // 2. Check rate limit before calling Gemini
+        if (req.rateLimited) {
+            console.log(`[Rate Limit] IP ${req.ip} exceeded rate limit.`);
+            geminiResult = '您在短时间内请求次数过多（限制每分钟1次），为节约资源，已跳过本次AI分析，请稍后重试';
+        } else {
+            console.log(`[Gemini] Calling API for IP: ${req.ip}`);
+            geminiResult = await callGemini(log);
+        }
+
+        const analysisResponse = {
             info,
-            log,
-            quickAnalysis: quickAnalysisResult
-        });
+            quickAnalysis: quickAnalysisResult,
+            gemini: geminiResult,
+            rateLimited: !!req.rateLimited,
+            isCached: false,
+        };
+
+        // 3. Store new, non-rate-limited result in cache
+        if (!req.rateLimited) {
+            analysisCache.set(logHash, {
+                ...analysisResponse,
+                timestamp: Date.now()
+            });
+            console.log(`[Cache] STORED new result for hash: ${logHash.substring(0, 10)}...`);
+        }
+
+        res.json(analysisResponse);
+
     } catch (error) {
         console.error('API /api/extract 发生错误:', error);
-        res.status(500).json({ error: '日志提取失败: ' + error.message });
+        res.status(500).json({ error: '日志提取与分析失败: ' + error.message });
     }
 });
 
-// --- 修改：更新统计API以提供图表数据 ---
+// --- STATS API is unchanged ---
 app.get('/api/stats', (req, res) => {
     const stats = {
         total: 0,
         daily: 0,
         weekly: 0,
-        dailyTrend: Array(7).fill(0) // 为过去7天初始化数组 [6天前, ..., 今天]
+        dailyTrend: Array(7).fill(0)
     };
-
-    // 使用db.serialize确保查询按顺序执行
     db.serialize(() => {
-        // 1. 获取总数 (此查询不变)
         db.get("SELECT COUNT(*) as count FROM upload_stats", [], (err, row) => {
             if (err) {
                 console.error("查询总数失败:", err.message);
@@ -484,19 +550,14 @@ app.get('/api/stats', (req, res) => {
             }
             stats.total = row.count || 0;
         });
-
-        // 2. 获取今日数量 (使用 'localtime' 修饰符，与本地时间存储的timestamp保持一致)
-        // 假设 timestamp 已经存储为本地时间
-        db.get(`SELECT COUNT(*) as count FROM upload_stats WHERE timestamp >= DATE('now', 'start of day')`, [], (err, row) => {
+        // 修复：使用 DATE('now', 'localtime') 确保与本地日期对齐
+        db.get(`SELECT COUNT(*) as count FROM upload_stats WHERE DATE(timestamp, 'localtime') = DATE('now', 'localtime')`, [], (err, row) => {
             if (err) {
                 console.error("查询每日数量失败:", err.message);
                 return res.status(500).json({ error: '获取每日统计失败' });
             }
             stats.daily = row.count || 0;
         });
-
-        // 3. 获取本周数量 (使用 'localtime' 修饰符)
-        // 假设 timestamp 已经存储为本地时间
         db.get(`SELECT COUNT(*) as count FROM upload_stats WHERE timestamp >= DATE('now', '-7 days')`, [], (err, row) => {
             if (err) {
                 console.error("查询每周数量失败:", err.message);
@@ -504,15 +565,12 @@ app.get('/api/stats', (req, res) => {
             }
             stats.weekly = row.count || 0;
         });
-
-        // 4. 获取过去7天的上传趋势 (使用 'localtime' 修饰符)
-        // 假设 timestamp 已经存储为本地时间
         const trendQuery = `
             SELECT
-                DATE(timestamp) as upload_day,
+                DATE(timestamp, 'localtime') as upload_day,
                 COUNT(*) as count
             FROM upload_stats
-            WHERE timestamp >= DATE('now', '-6 days') 
+            WHERE timestamp >= DATE('now', '-6 days', 'localtime')
             GROUP BY upload_day;
         `;
         db.all(trendQuery, [], (err, rows) => {
@@ -520,30 +578,24 @@ app.get('/api/stats', (req, res) => {
                 console.error("查询趋势数据失败:", err.message);
                 return res.status(500).json({ error: '获取趋势数据失败' });
             }
-
-            // 生成过去7天的日期数组（本地时间）
             const dates = [];
             for (let i = 6; i >= 0; i--) {
                 const d = new Date();
                 d.setDate(d.getDate() - i);
-                dates.push(d.toISOString().split('T')[0]); // 获取 YYYY-MM-DD 格式
+                // 确保日期格式与 SQLite 的 DATE() 输出匹配
+                dates.push(d.toISOString().split('T')[0]);
             }
-
-            // 将查询到的数据映射到 dailyTrend 数组中
             const trendMap = new Map();
             rows.forEach(row => {
                 trendMap.set(row.upload_day, row.count);
             });
-
             stats.dailyTrend = dates.map(date => trendMap.get(date) || 0);
-
-            // 6. 所有查询完成后，发送最终结果
             res.json(stats);
         });
     });
 });
-// --- 统计 API 修改结束 ---
 
+// --- OTHER APIs are unchanged ---
 app.get('/api/github-info', async (req, res) => {
     const repoOwner = 'LanRhyme';
     const repoName = 'Web-MinecraftLogAnalyzer';

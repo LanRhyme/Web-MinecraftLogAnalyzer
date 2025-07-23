@@ -13,7 +13,7 @@ const upload = multer({ dest: 'uploads/' });
 
 app.use(cors());
 app.use(express.json({ limit: '8mb' }));
-app.set('trust proxy', 1); // Important for getting the correct client IP behind a proxy
+app.set('trust proxy', 1); // 对于在代理后面获取正确的客户端 IP 很重要
 
 const PORT = process.env.PORT || 3000;
 

@@ -8,6 +8,12 @@
 
 ---
 
+## 📖 开发文档
+
+[https://zread.ai/LanRhyme/Web-MinecraftLogAnalyzer](https://zread.ai/LanRhyme/Web-MinecraftLogAnalyzer)
+
+---
+
 ## 📦 功能特色
 
 - 📝 支持上传 `.log` 或 `.txt` 日志文件（≤8MB）
@@ -56,6 +62,8 @@ node server.js
 
 默认访问地址：http://localhost:3000
 
+---
+
 ## 📁 项目结构
 ```
 ├── index.html              # 前端界面（使用 Tailwind + Chart.js + Marked）
@@ -64,6 +72,9 @@ node server.js
 ├── .env                    # 环境变量配置
 └── README.md               # 项目说明文档
 ```
+
+---
+
 ## 💡 技术栈
 * 前端：
  * 🎨 Tailwind CSS + 自定义暗黑主题
@@ -75,16 +86,22 @@ node server.js
  * 🤖 Gemini AI 代理调用（支持代理转发）
  * 📄 自定义正则匹配器（支持 Amethyst、Zalith、Fold Craft 启动器日志格式）
 
+---
+
 ## 🔍 支持的启动器
 
 * ✅ Amethyst (Pojav)_iOS
 * ✅ Zalith Launcher
 * ✅ Fold Craft Launcher
 
+---
+
 ## 🤝 鸣谢
 * PCL2 代码崩溃匹配规则参考 [https://github.com/Meloong-Git/PCL](https://github.com/Meloong-Git/PCL/blob/main/Plain%20Craft%20Launcher%202/Modules/Minecraft/ModCrash.vb)
 * Google Gemini AI 模型支持
 * TailwindCSS 社区设计资源
+
+---
 
 ## 📫 联系我
 欢迎访问个人主页 👉 [https://lanrhyme.netlify.app/](https://lanrhyme.netlify.app/)

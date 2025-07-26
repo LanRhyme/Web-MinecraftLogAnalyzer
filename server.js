@@ -15,7 +15,7 @@ app.use(cors());
 app.use(express.json({ limit: '8mb' }));
 app.set('trust proxy', 1); // 对于在代理后面获取正确的客户端 IP 很重要
 
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || '';
 
 const db = new sqlite3.Database('./stats.db', sqlite3.OPEN_READWRITE | sqlite3.OPEN_CREATE, (err) => {
     if (err) {

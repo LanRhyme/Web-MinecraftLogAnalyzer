@@ -4,7 +4,13 @@
 
 ## 🖼️ 在线体验地址
 
-👉 [https://mclog.xiaohe520.top/](https://mclog.xiaohe520.top/)
+👉 [https://lanrhymelog.netlify.app/](https://lanrhymelog.netlify.app/)
+
+## netlify快速部署版本
+
+👉 [https://github.com/LanRhyme/Web-MinecraftLogAnalyzer-Netlify](https://github.com/LanRhyme/Web-MinecraftLogAnalyzer-Netlify)
+
+之后将主要更新netlify版本，原始版本部分内容会同步更新(但是我比较懒，可能非常——不及时，有需要的话可以提issue)
 
 ---
 

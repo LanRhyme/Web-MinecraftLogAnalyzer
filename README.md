@@ -71,6 +71,9 @@ GITHUB_TOKEN=GitHub令牌（可选）  #用于github仓库信息卡片，不用�
 ### 启动项目
 
 ```bash
+# 第一次启动需要nodemon环境
+npx nodemon server.js
+# 下次启动执行
 node server.js
 ```
 

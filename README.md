@@ -42,6 +42,8 @@
 
 </details>
 
+<details><summary>开始安装本项目</summary>
+  
 ### 克隆项目
 
 ```bash
@@ -55,6 +57,8 @@ cd Web-MinecraftLogAnalyzer
 ```bash
 npm install
 ```
+
+</details>
 
 ### 配置环境变量
 创建 .env 文件，内容如下：

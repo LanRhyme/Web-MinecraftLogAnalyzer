@@ -36,7 +36,7 @@
 ## 🚀 快速开始
 
 > 环境准备：Windows/Linux
-> [Node.js(>=v23.11)](https://nodejs.org), [Git](https://git-scm.com)
+> [Node.js(>=v23.11)](https://nodejs.org),  [Git](https://git-scm.com)
 
 ### 克隆项目
 

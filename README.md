@@ -35,8 +35,12 @@
 
 ## 🚀 快速开始
 
+<details><summary>安装前需求</summary>
+  
 > 环境准备：Windows/Linux
 > [Node.js(>=v23.11)](https://nodejs.org),  [Git](https://git-scm.com)
+
+</details>
 
 ### 克隆项目
 

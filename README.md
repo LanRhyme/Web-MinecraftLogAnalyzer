@@ -42,6 +42,13 @@ git clone https://github.com/LanRhyme/Web-MinecraftLogAnalyzer.git
 cd Web-MinecraftLogAnalyzer
 ```
 
+### ssh克隆项目
+
+```bash
+git clone git@github.com:LanRhyme/Web-MinecraftLogAnalyzer.git
+cd Web-MinecraftLogAnalyzer
+```
+
 ### 安装依赖
 
 ```bash

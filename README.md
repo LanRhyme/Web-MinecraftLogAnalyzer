@@ -48,6 +48,7 @@
 
 ```bash
 git clone https://github.com/LanRhyme/Web-MinecraftLogAnalyzer.git
+# ssh克隆
 git clone git@github.com:LanRhyme/Web-MinecraftLogAnalyzer.git
 cd Web-MinecraftLogAnalyzer
 ```

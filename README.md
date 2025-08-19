@@ -82,7 +82,7 @@ npx nodemon server.js
 node server.js
 ```
 
-默认访问地址：http://localhost:3000
+默认访问地址：`http://localhost:3000`
 
 ---
 

@@ -629,7 +629,7 @@ app.get('/api/check-gemini-status', async (req, res) => {
     }
     const startTime = Date.now();
     try {
-        await axios.get(target, { timeout: 5000 });
+        await axios.get(target, { timeout: 8000 });
         const endTime = Date.now();
         const latency = endTime - startTime;
         res.json({ status: 'ok', message: 'Gemini 代理连接正常', latency: latency });

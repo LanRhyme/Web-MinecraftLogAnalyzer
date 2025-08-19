@@ -62,7 +62,7 @@ npm install
 </details>
 
 ### 配置环境变量
-创建 .env 文件，内容如下：
+配置.env 文件，内容如下：
 
 ```env
 PORT=3000
